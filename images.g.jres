@@ -1,0 +1,17 @@
+{
+    "image1": {
+        "data": "hwQQABAAAAACIiIiIiIiIAAAAAAAAAAAAgAAAAAAACACAAAAAAAAIAIAAAAAAAAgAgAAAAAAACACAAAAAAAAIAIAAAAAAAAgAgAAAAAAACACAAAAAAAAIAIAAAAAAAAgAgAAAAAAACACAAAAAAAAIAIAAAAAAAAgAAAAAAAAAAACIiIiIiIiIA==",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "cursor"
+    },
+    "image2": {
+        "data": "hwSgABAAAADCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzMLMzMzMzMzMwszMzMzMzMzCzMzMzMzMzA==",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "info"
+    },
+    "*": {
+        "mimeType": "image/x-mkcd-f4",
+        "dataEncoding": "base64",
+        "namespace": "myImages"
+    }
+}

@@ -1,14 +1,24 @@
+
 controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
     if (controller.A.isPressed()) {
+        cursor.isInvisible(false);
+        scene.cameraFollowSprite(cursor)
         cursor.controller_handler('up')
     } else {
+        cursor.isInvisible(true);
+        scene.cameraFollowSprite(mySprite)
         controller.moveSprite(mySprite, 100, 0)
         simplified.gravity_jump(mySprite, -200)
     }
 })
 controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
     if (controller.A.isPressed()) {
+        cursor.isInvisible(false);
+        scene.cameraFollowSprite(mySprite)
+        scene.cameraFollowSprite(cursor)
         cursor.controller_handler('down')
+    } else {
+        cursor.isInvisible(true);
     }
 })
 function random (min: number, max: number) {
@@ -26,16 +36,24 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
 })
 controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
     if (controller.A.isPressed()) {
+        cursor.isInvisible(false);
+        scene.cameraFollowSprite(cursor)
         cursor.controller_handler('left')
     } else {
+        cursor.isInvisible(true);
+        scene.cameraFollowSprite(mySprite)
         controller.moveSprite(mySprite, 100, 0)
         isRight = false
     }
 })
 controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
     if (controller.A.isPressed()) {
+        cursor.isInvisible(false);
+        scene.cameraFollowSprite(cursor)
         cursor.controller_handler('right')
     } else {
+        cursor.isInvisible(true);
+        scene.cameraFollowSprite(mySprite)
         controller.moveSprite(mySprite, 100, 0)
         isRight = true
     }
@@ -312,9 +330,18 @@ class Cursor extends Sprite {
         let y2 = scene.cameraProperty(CameraProperty.Y)
         this.infoSprite.sprite.setPosition(x2, y2 - 60 + 112)
     }
+
+    isInvisible(bool: boolean) {
+        if (bool) {
+            cursor.setImage(assets.image`emptyCursor`)
+        } else {
+            cursor.setImage(assets.image`cursor`)
+        }
+    }
 }
+
 let cursor = new Cursor(assets.image`cursor`, 16);
 cursor.setPosition(8, 8)
-scene.cameraFollowSprite(cursor)
+
 let width = screen.width;
 let height = screen.height;

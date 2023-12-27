@@ -1,4 +1,3 @@
-
 controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
     if (controller.A.isPressed()) {
         cursor.isInvisible(false);
@@ -25,6 +24,7 @@ function random (min: number, max: number) {
     out = randint(55 - min, 55 - max)
     return out
 }
+
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     controller.moveSprite(mySprite, 0, 0)
     if (текущийРежим < режим.length - 1) {
@@ -46,6 +46,7 @@ controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
         isRight = false
     }
 })
+
 controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
     if (controller.A.isPressed()) {
         cursor.isInvisible(false);
@@ -58,6 +59,7 @@ controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
         isRight = true
     }
 })
+
 function рандомКарты () {
     генераторБлоков(assets.tile`myTile14`, 1760, 50, 50)
     генераторБлоков(assets.tile`myTile7`, 1760, 49, 45)
@@ -247,16 +249,14 @@ info.setLife(20)
 рандомКарты()
 mySprite.ay = 850
 isRight = true
-генераторБлоков(assets.tile`myTile14`, 1, 51, 51)
 режим = ["ставитьБлоки", "долбить"]
 текущийРежим = 0
 
 let rowOfTiles: Image[] = []
 let allTiles: Image[][] = []
-for (let y = 0; y <= 15; y++) {
+for (let y = 0; y <= 54; y++) {
     rowOfTiles = []
-    // console.log(rowOfTiles[x]);
-    for (let x = 0; x <= 15; x++) {
+    for (let x = 0; x <= 54; x++) {
         rowOfTiles[x] = tiles.tileImageAtLocation(tiles.getTileLocation(x, y))
     }
     allTiles[y] = rowOfTiles
@@ -265,20 +265,87 @@ for (let y = 0; y <= 15; y++) {
 let stastic: Sprite = new Sprite(allTiles[0][0]);
 class InfoSprite {
     sprite: Sprite;
+    icon: Image; // Картинка выделенного объекта
+    label: string; // Название выделенного объекта
     constructor() {
-        this.sprite = new Sprite(assets.image`info`);
+        this.sprite = new Sprite(img`
+2222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+`);
         this.sprite.setPosition(0, 104)
     }
+    // Данные о новых координатах камеры должны приходить в параметрах метода
+    updatePosition() {
+        this.sprite.setPosition(scene.cameraProperty(CameraProperty.X), scene.cameraProperty(CameraProperty.Y) - 60 + 112)
+    }
+    // todo: Сделать скрытие и оборажение объекта инфопанели
+    // Метод для наполнения icon и label
+    setInfo(image: Image, label: string) {
+        this.icon = image;
+        this.label = label;
+    }
+
+    /**
+    * Set the game camera to follow a sprite
+    * @param sprite
+    */
+    //% blockId=camerafollow block="camera follow sprite %sprite=variables_get(mySprite)"
+    //% group="Camera"
+    //% help=scene/camera-follow-sprite
+    //% weight=100
+    infoFollowSprite(sprite: Sprite) {
+    const scene = game.currentScene();
+    scene.camera.sprite = sprite;
+    scene.camera.update();
 }
+}
+
+/** Информационная панелька должна работать независимо от курсора
+ * курсор возвращает значения
+ * Убрать ассеты из курсора и инфопанели
+ */
 class Cursor extends Sprite {
     current_aim: object;
     sensitivity: number;
-    infoSprite: InfoSprite;
-    constructor(image: Image, sensitivity: number) {
+    cursorInvisible: Image = img`
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . . . 
+`;
+    cursorImage: Image;
+
+    constructor(sensitivity: number, image: Image) {
         super(image);
+        this.cursorImage = image;
         this.sensitivity = sensitivity;
-        this.infoSprite = new InfoSprite();
-        this.infoSprite.sprite.setPosition(80, 112)
+        this.isInvisible(false);
     }
 
     controller_handler(direction: string) {
@@ -289,7 +356,7 @@ class Cursor extends Sprite {
                 }
                 break;
             case 'right':
-                if (this.x <= 15 * 16) {
+                if (this.x <= 54 * 16) {
                     this.x += this.sensitivity * 1
                 }
                 break;
@@ -299,25 +366,19 @@ class Cursor extends Sprite {
                 }
                 break;
             case 'down':
-                if (this.y <= 15 * 16) {
+                if (this.y <= 54 * 16) {
                     this.y += this.sensitivity * 1
                 }
                 break;
+            
         }
-        //console.log(`x: ${cursor.tilemapLocation().column}, y: ${cursor.tilemapLocation().row}`);
 
         let tile = tiles.getTileLocation(
             cursor.tilemapLocation().column, cursor.tilemapLocation().row
         )
-        //console.log(tiles.tileAtLocationEquals(cursor.tilemapLocation(), allTiles[1][1]));
-        //console.log(tile.x);
-        //console.log(tile.y);
 
         const ppx = tile.x + 16 + 8;
         const ppy = tile.y + 16 + 8;
-        //console.log(cursor.tilemapLocation().column)
-        //console.log(cursor.tilemapLocation().row)
-        //console.log(allTiles[cursor.tilemapLocation().column][cursor.tilemapLocation().row])
         let oldImage = allTiles[cursor.tilemapLocation().row][cursor.tilemapLocation().column]
         let newImage = oldImage.clone();
 
@@ -325,23 +386,43 @@ class Cursor extends Sprite {
         newImage.drawRect(0, 0, 16, 16, 1);
 
         stastic.setPosition(ppx, ppy);
-
-        let x2 = scene.cameraProperty(CameraProperty.X)
-        let y2 = scene.cameraProperty(CameraProperty.Y)
-        this.infoSprite.sprite.setPosition(x2, y2 - 60 + 112)
     }
 
     isInvisible(bool: boolean) {
         if (bool) {
-            cursor.setImage(assets.image`emptyCursor`)
+            this.setImage(this.cursorInvisible)
         } else {
-            cursor.setImage(assets.image`cursor`)
+            this.setImage(this.cursorImage)
         }
     }
 }
 
-let cursor = new Cursor(assets.image`cursor`, 16);
+let cursor = new Cursor(16, img`
+2 . 2 2 2 2 2 2 2 2 2 2 2 2 . 2 
+. . . . . . . . . . . . . . . . 
+2 . . . . . . . . . . . . . . 2 
+2 . . . . . . . . . . . . . . 2 
+2 . . . . . . . . . . . . . . 2 
+2 . . . . . . . . . . . . . . 2 
+2 . . . . . . . . . . . . . . 2 
+2 . . . . . . . . . . . . . . 2 
+2 . . . . . . . . . . . . . . 2 
+2 . . . . . . . . . . . . . . 2 
+2 . . . . . . . . . . . . . . 2 
+2 . . . . . . . . . . . . . . 2 
+2 . . . . . . . . . . . . . . 2 
+2 . . . . . . . . . . . . . . 2 
+. . . . . . . . . . . . . . . . 
+2 . 2 2 2 2 2 2 2 2 2 2 2 2 . 2 
+`);
 cursor.setPosition(8, 8)
 
-let width = screen.width;
-let height = screen.height;
+let infoSprite: InfoSprite;
+console.log(`mySprite.flags:${mySprite.flags}`)
+console.log(`SpriteFlag.StayInScreen:${SpriteFlag.StayInScreen}`)
+
+infoSprite = new InfoSprite();
+game.onUpdate(function () {
+    // Обновляем положение инфопанели относительно камеры
+    infoSprite.updatePosition()
+})

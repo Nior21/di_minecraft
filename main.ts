@@ -254,7 +254,7 @@ isRight = true
 
 class InfoSprite {
     private _sprite: Sprite;
-    private _image_info: Image; // Картинка выделенного объекта
+    private _image_info: Sprite; // Картинка выделенного объекта
     private _label_info: string; // Название выделенного объекта
     private displayed_info: Image = img`
         2222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222
@@ -295,10 +295,30 @@ class InfoSprite {
     constructor() {
         this._sprite = new Sprite(this.displayed_info);
         this.sprite.setPosition(0, 104);
+        this.image_info = new Sprite(img`
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+        `)
+        this.image_info.image.drawRect(0, 0, 16, 16, 2);
     }
     // Данные о новых координатах камеры должны приходить в параметрах метода
     updatePosition() {
         this._sprite.setPosition(scene.cameraProperty(CameraProperty.X), scene.cameraProperty(CameraProperty.Y) - 60 + 112)
+        this._image_info.setPosition(scene.cameraProperty(CameraProperty.X) - 16 * 4.5, scene.cameraProperty(CameraProperty.Y) - 60 + 112)
     }
 
     get sprite() {
@@ -324,13 +344,19 @@ class InfoSprite {
     }
 
     setInfo(image: Image, label: string) {
+        // Клонируем рисунок, т.к. это ссылочный тип
+        let newImage = image.clone();
+        // Рисуем квадрат вокруг изображения
+        newImage.drawRect(0, 0, 16, 16, 2); 
+        // Отображаем картинку в соответствующем спрайте
+        this.image_info.setImage(newImage);
 
-        this.image_info = image.clone();
+        // Добавляем аннотацию к изображению
         this.label_info = label;
 
-        this.image_info.drawRect(0, 0, 16, 16, 1);
-        this.displayed_info.drawImage(this.image_info, 0, 0)
-
+        
+        //this.displayed_info.drawImage(this.image_info, 0, 0)
+        
         //const ppx = tile.x + 16 + 8;
         //const ppy = tile.y + 16 + 8;
         //stastic.setPosition(ppx, ppy);
@@ -363,6 +389,7 @@ for (let y = 0; y <= 54; y++) {
  */
 class Cursor extends Sprite {
     _current_image: Image;
+    _current_tile: typeof tiles;
     sensitivity: number;
     cursorInvisible: Image = img`
         . . . . . . . . . . . . . . . . 
@@ -421,8 +448,7 @@ class Cursor extends Sprite {
             cursor.tilemapLocation().column, cursor.tilemapLocation().row
         )
 
-        // Отображаем текущий тайл.
-        // todo: вынести эти данные в виде геттера
+        // Сохраняем текущий тайл (картинку).
         this._current_image = allTiles[cursor.tilemapLocation().row][cursor.tilemapLocation().column]
     }
 

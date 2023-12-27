@@ -252,6 +252,101 @@ isRight = true
 режим = ["ставитьБлоки", "долбить"]
 текущийРежим = 0
 
+class InfoSprite {
+    private _sprite: Sprite;
+    private _image_info: Image; // Картинка выделенного объекта
+    private _label_info: string; // Название выделенного объекта
+    private displayed_info: Image = img`
+        2222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222
+        cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+        cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+        cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+        cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+        cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+        cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+        cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+        cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+        cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+        cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+        cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+        cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+        cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+        cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+        cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+        `
+    private hidden_info: Image = img`
+        ................................................................................................................................................................
+        ................................................................................................................................................................
+        ................................................................................................................................................................
+        ................................................................................................................................................................
+        ................................................................................................................................................................
+        ................................................................................................................................................................
+        ................................................................................................................................................................
+        ................................................................................................................................................................
+        ................................................................................................................................................................
+        ................................................................................................................................................................
+        ................................................................................................................................................................
+        ................................................................................................................................................................
+        ................................................................................................................................................................
+        ................................................................................................................................................................
+        ................................................................................................................................................................
+        ................................................................................................................................................................
+    `
+    constructor() {
+        this._sprite = new Sprite(this.displayed_info);
+        this.sprite.setPosition(0, 104);
+    }
+    // Данные о новых координатах камеры должны приходить в параметрах метода
+    updatePosition() {
+        this._sprite.setPosition(scene.cameraProperty(CameraProperty.X), scene.cameraProperty(CameraProperty.Y) - 60 + 112)
+    }
+
+    get sprite() {
+        return this._sprite;
+    }
+    set sprite(value) {
+        this._sprite = value;
+    }
+
+    // Методы для наполнения icon и label
+    get image_info() {
+        return this._image_info;
+    }
+    set image_info(value) {
+        this._image_info = value;
+    }
+    
+    get label_info() {
+        return this._label_info;
+    }
+    set label_info(value) {
+        this._label_info = value;
+    }
+
+    setInfo(image: Image, label: string) {
+
+        this.image_info = image.clone();
+        this.label_info = label;
+
+        this.image_info.drawRect(0, 0, 16, 16, 1);
+        this.displayed_info.drawImage(this.image_info, 0, 0)
+
+        //const ppx = tile.x + 16 + 8;
+        //const ppy = tile.y + 16 + 8;
+        //stastic.setPosition(ppx, ppy);
+    }
+
+    // Метод скрывает или отображает панель
+    isInvisible(bool: boolean) {
+        if (bool) {
+            this.sprite.setImage(this.displayed_info)
+        } else {
+            this.sprite.setImage(this.hidden_info)
+        }
+    }
+}
+
+// Собираем информацию обо всех тайлах
 let rowOfTiles: Image[] = []
 let allTiles: Image[][] = []
 for (let y = 0; y <= 54; y++) {
@@ -261,84 +356,31 @@ for (let y = 0; y <= 54; y++) {
     }
     allTiles[y] = rowOfTiles
 }
-// устанавливает исходную картинку как самый левый верхний тайл
-let stastic: Sprite = new Sprite(allTiles[0][0]);
-class InfoSprite {
-    sprite: Sprite;
-    icon: Image; // Картинка выделенного объекта
-    label: string; // Название выделенного объекта
-    constructor() {
-        this.sprite = new Sprite(img`
-2222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-`);
-        this.sprite.setPosition(0, 104)
-    }
-    // Данные о новых координатах камеры должны приходить в параметрах метода
-    updatePosition() {
-        this.sprite.setPosition(scene.cameraProperty(CameraProperty.X), scene.cameraProperty(CameraProperty.Y) - 60 + 112)
-    }
-    // todo: Сделать скрытие и оборажение объекта инфопанели
-    // Метод для наполнения icon и label
-    setInfo(image: Image, label: string) {
-        this.icon = image;
-        this.label = label;
-    }
-
-    /**
-    * Set the game camera to follow a sprite
-    * @param sprite
-    */
-    //% blockId=camerafollow block="camera follow sprite %sprite=variables_get(mySprite)"
-    //% group="Camera"
-    //% help=scene/camera-follow-sprite
-    //% weight=100
-    infoFollowSprite(sprite: Sprite) {
-    const scene = game.currentScene();
-    scene.camera.sprite = sprite;
-    scene.camera.update();
-}
-}
 
 /** Информационная панелька должна работать независимо от курсора
  * курсор возвращает значения
  * Убрать ассеты из курсора и инфопанели
  */
 class Cursor extends Sprite {
-    current_aim: object;
+    _current_image: Image;
     sensitivity: number;
     cursorInvisible: Image = img`
-. . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . 
-. . . . . . . . . . . . . . . . 
-`;
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . `;
     cursorImage: Image;
 
     constructor(sensitivity: number, image: Image) {
@@ -346,6 +388,8 @@ class Cursor extends Sprite {
         this.cursorImage = image;
         this.sensitivity = sensitivity;
         this.isInvisible(false);
+        // устанавливает исходную картинку как самый левый верхний тайл
+        this._current_image = allTiles[0][0];
     }
 
     controller_handler(direction: string) {
@@ -377,15 +421,16 @@ class Cursor extends Sprite {
             cursor.tilemapLocation().column, cursor.tilemapLocation().row
         )
 
-        const ppx = tile.x + 16 + 8;
-        const ppy = tile.y + 16 + 8;
-        let oldImage = allTiles[cursor.tilemapLocation().row][cursor.tilemapLocation().column]
-        let newImage = oldImage.clone();
+        // Отображаем текущий тайл.
+        // todo: вынести эти данные в виде геттера
+        this._current_image = allTiles[cursor.tilemapLocation().row][cursor.tilemapLocation().column]
+    }
 
-        stastic.setImage(newImage);
-        newImage.drawRect(0, 0, 16, 16, 1);
-
-        stastic.setPosition(ppx, ppy);
+    get current_image() {
+        return this._current_image;
+    }
+    set current_image(value) {
+        this._current_image = value;
     }
 
     isInvisible(bool: boolean) {
@@ -425,4 +470,5 @@ infoSprite = new InfoSprite();
 game.onUpdate(function () {
     // Обновляем положение инфопанели относительно камеры
     infoSprite.updatePosition()
+    infoSprite.setInfo(cursor.current_image, 'current tile')
 })

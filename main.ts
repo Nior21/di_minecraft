@@ -353,13 +353,6 @@ class InfoSprite {
 
         // Добавляем аннотацию к изображению
         this.label_info = label;
-
-        
-        //this.displayed_info.drawImage(this.image_info, 0, 0)
-        
-        //const ppx = tile.x + 16 + 8;
-        //const ppy = tile.y + 16 + 8;
-        //stastic.setPosition(ppx, ppy);
     }
 
     // Метод скрывает или отображает панель
@@ -497,4 +490,146 @@ game.onUpdate(function () {
     // Обновляем положение инфопанели относительно камеры
     infoSprite.updatePosition()
     infoSprite.setInfo(cursor.current_image, 'current tile')
+    
+    timer.throttle("action", 100, function () {
+        //circlesMove()
+        lidar();
+    })
 })
+
+/**
+ * todo: Сделать прицел на 4 клетки в стороны от персонажа и только доступные по прямой линии
+ * 1) Вычисляем ближайшие 4 тайла
+ * 2) Выстреливаем в углы всех выбранных тайлов
+ * 3) Используем overlap для поиска тех тайлов в хотя бы один из углов которых мы попали
+ * 4) Сохраняем в массив эти тайлы в порядке слева направо
+ */
+
+
+/**
+class Ray {
+    sprite: Sprite;
+    x: number;
+    y: number;
+    constructor(x: number , y: number) {
+        this.sprite = new Sprite(img`
+            2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+            2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+            2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+            `);
+        this.x = x;
+        this.y = y;
+    }
+    
+}
+ */
+
+const lidar = () => {
+    let myLocation = mySprite.tilemapLocation();
+    console.log(myLocation)
+}
+
+let angle = 0, increment = 5, radius = 64, speed = 5; 
+
+function circlesMove() {
+    
+    angle = angle + increment;
+    let vx = radius * Math.cos(angle * Math.PI / 180);
+    let vy = radius * Math.sin(angle * Math.PI / 180);
+    let projectile = sprites.createProjectileFromSprite(img`
+        f
+    `, mySprite, vx * speed, vy * speed)
+    projectile.setFlag(SpriteFlag.BounceOnWall, true)
+
+    
+
+
+    scene.onHitWall(SpriteKind.Projectile, function (sprite, location) {
+        sprite.setVelocity(0, 0)
+
+        // tiles.setTileAt(location, img`
+        //         . . . . . . . . . . . . . . . . 
+        //         . . . . . . . . . . . . . . . . 
+        //         . . . . . . . . . . . . . . . . 
+        //         . . . . . . . . . . . . . . . . 
+        //         . . . . . . . . . .4. . . . . 
+        //         . . . . 2. . . . 4 4. . . . . 
+        //         . . . . 2 4. . 4 5 4. . . . . 
+        //         . . . . . 2 4 d 5 5 4. . . . . 
+        //         . . . . . 2 5 5 5 5 4. . . . . 
+        //         . . . . . . 2 5 5 5 5 4. . . . 
+        //         . . . . . . 2 5 4 2 4 4. . . . 
+        //         . . . . . . 4 4. . 2 4 4. . . 
+        //         . . . . . 4 4. . . . . . . . . 
+        //         . . . . . . . . . . . . . . . . 
+        //         . . . . . . . . . . . . . . . . 
+        //         . . . . . . . . . . . . . . . . 
+        //         `)
+        // timer.after(100, function () {
+        //     tiles.setTileAt(location, img`
+        //                 .3. . . . . . . . . . . 4. . 
+        //                 . 3 3. . . . . . . . . 4 4. . 
+        //                 . 3 d 3. . 4 4. . 4 4 d 4. . 
+        //                 . . 3 5 3 4 5 5 4 4 d d 4 4. . 
+        //                 . . 3 d 5 d 1 1 d 5 5 d 4 4. . 
+        //                 . . 4 5 5 1 1 1 1 5 1 1 5 4. . 
+        //                 . 4 5 5 5 5 1 1 5 1 1 1 d 4 4. 
+        //                 . 4 d 5 1 1 5 5 5 1 1 1 5 5 4. 
+        //                 . 4 4 5 1 1 5 5 5 5 5 d 5 5 4. 
+        //                 . . 4 3 d 5 5 5 d 5 5 d d d 4. 
+        //                 . 4 5 5 d 5 5 5 d d d 5 5 4. . 
+        //                 . 4 5 5 d 3 5 d d 3 d 5 5 4. . 
+        //                 . 4 4 d d 4 d d d 4 3 d d 4. . 
+        //                 . . 4 5 4 4 4 4 4 4 4 4 4. . . 
+        //                 . 4 5 4. . 4 4 4. . . 4 4. . 
+        //                 . 4 4. . . . . . . . . . 4 4. 
+        //                 `)
+        // })
+        // timer.after(200, function () {
+        //     tiles.setTileAt(location, img`
+        //                 . . . . . . . . . . . . . . . . 
+        //                 . . . . . . . . . . . . . . . . 
+        //                 . . . . .b b.b b b. . . . . 
+        //                 . . . .b 1 1 b 1 1 1 b. . . . 
+        //                 . .b b 3 1 1 d d 1 d d b b. . 
+        //                 .b 1 1 d d b b b b b 1 1 b. . 
+        //                 .b 1 1 1 b. . . . .b d d b. 
+        //                 . . 3 d d b. . . . .b d 1 1 b
+        //         .b 1 d 3. . . . . . .b 1 1 b
+        //         .b 1 1 b. . . . . .b b 1 d b
+        //         .b 1 d b. . . . . .b d 3 d b
+        //         .b b d d b. . . .b d d d b. 
+        //                 .b d d d d b.b b 3 d d 3 b. 
+        //                 . .b d d 3 3 b d 3 3 b b b. . 
+        //                 . . .b b b d d d d d b. . . . 
+        //                 . . . . . .b b b b b. . . . . 
+        //                 `)
+        // })
+        // timer.after(300, function () {
+        //     tiles.setWallAt(location, false)
+        //     tiles.setTileAt(location, img`
+        //         . . . . . . . . . . . . . . . .
+        //         . . . . . . . . . . . . . . . .
+        //         . . . . . . . . . . . . . . . .
+        //         . . . . . . . . . . . . . . . .
+        //         . . . . . . . . . . . . . . . .
+        //         . . . . . . . . . . . . . . . .
+        //         . . . . . . . . . . . . . . . .
+        //         . . . . . . . . . . . . . . . .
+        //         . . . . . . . . . . . . . . . .
+        //         . . . . . . . . . . . . . . . .
+        //         . . . . . . . . . . . . . . . .
+        //         . . . . . . . . . . . . . . . .
+        //         . . . . . . . . . . . . . . . .
+        //         . . . . . . . . . . . . . . . .
+        //         . . . . . . . . . . . . . . . .
+        //         . . . . . . . . . . . . . . . .
+        //     `)
+        // })
+        tiles.getTileAt(location.column, location.row).drawRect(0, 0, 16, 16, 4)
+    })
+}
+
+
+//mySprite.tilemapLocation()
+//location.getNeighboringLocation(CollisionDirection.Left)

@@ -3,7 +3,8 @@
     "description": "",
     "dependencies": {
         "device": "*",
-        "simple-blocks": "github:microsoft/arcade-tutorial-extensions/simple-blocks/"
+        "simple-blocks": "github:microsoft/arcade-tutorial-extensions/simple-blocks/",
+        "Timers": "github:microsoft/arcade-timers#v1.1.0"
     },
     "files": [
         "main.blocks",

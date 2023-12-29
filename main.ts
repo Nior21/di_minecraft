@@ -193,6 +193,8 @@ isRight = true
 режим = ["ставитьБлоки", "долбить"]
 mode = 0
 
+///////// INFO PANEL /////////
+
 class InfoSprite {
     private _sprite: Sprite;
     private _image_info: Sprite; // Картинка выделенного объекта
@@ -317,6 +319,8 @@ for (let y = 0; y <= 54; y++) {
     allTiles[y] = rowOfTiles
 }
 
+///////// CURSOR /////////
+
 class Cursor extends Sprite {
     _current_image: Image;
     _current_tile: typeof tiles;
@@ -344,7 +348,7 @@ class Cursor extends Sprite {
         super(image);
         this.cursorImage = image;
         this.sensitivity = sensitivity;
-        this.isInvisible(false);
+        this.setInvisible(false);
         // устанавливает исходную картинку как самый левый верхний тайл
         this._current_image = allTiles[0][0];
     }
@@ -389,7 +393,7 @@ class Cursor extends Sprite {
         this._current_image = value;
     }
 
-    isInvisible(bool: boolean) {
+    setInvisible(bool: boolean) {
         if (bool) {
             this.setImage(this.cursorInvisible)
         } else {
@@ -426,53 +430,6 @@ game.onUpdate(function () {
     infoSprite.updatePosition()
     infoSprite.setInfo(cursor.current_image, 'current tile')
 })
-
-/**
- * todo: Сделать прицел на 4 клетки в стороны от персонажа и только доступные по прямой линии
- * [+] 1) Вычисляем ближайшие 4 тайла
- * [-] 2) Выстреливаем в углы всех выбранных тайлов
- * [-] 3) Используем overlap для поиска тех тайлов в хотя бы один из углов которых мы попали
- * [-] 4) Сохраняем в массив эти тайлы в порядке слева направо
- */
-
-let angle = 0, increment = 5, radius = 64, speed = 5; 
-
-function circlesMove() {
-    
-    angle = angle + increment;
-    let vx = radius * Math.cos(angle * Math.PI / 180);
-    let vy = radius * Math.sin(angle * Math.PI / 180);
-    let projectile = sprites.createProjectileFromSprite(img`
-        f
-    `, mySprite, vx * speed, vy * speed)
-    projectile.setFlag(SpriteFlag.BounceOnWall, true)
-
-    scene.onHitWall(SpriteKind.Projectile, function (sprite, location) {
-        sprite.setVelocity(0, 0)
-
-        
-        tiles.getTileAt(location.column, location.row).drawRect(0, 0, 16, 16, 4)
-    })
-}
-
-const scan = () => {
-    let radius = 3; // in tiles
-    let { column, row } = mySprite.tilemapLocation();
-    let wallsArray: Array<tiles.Location> = [];
-    let emptyArray: Array<tiles.Location> = [];
-    for (let y = row - radius; y < row + radius; y++) {
-        for (let x = column - radius; x < column + radius; x++) {
-            if (tiles.tileAtLocationIsWall(tiles.getTileLocation(x, y))) {
-                wallsArray.push(tiles.getTileLocation(x, y));
-            } else {
-                emptyArray.push(tiles.getTileLocation(x, y));
-            }
-        }
-    }
-    console.log(`wallsArray:${wallsArray.length}, emptyArray:${emptyArray.length}`)
-    return { walls: wallsArray, empty: emptyArray}
-}
-
 
 const destroyBlock = (location: tiles.Location) => {
     let { walls } = scan();
@@ -571,7 +528,7 @@ const createBlock = (location: tiles.Location) => {
     }
 }
 
-/////// CONTROLLER /////////
+///////// CONTROLLER /////////
 
 let startTime: number;
 let endTime: number;
@@ -579,17 +536,18 @@ let isMove = true;
 
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     controller.moveSprite(mySprite, 0, 0) // Лишает персонажа возможности двигаться
+    cursor.setInvisible(false);
     isMove = false;
     startTime = game.runtime();
 })
 
 controller.A.onEvent(ControllerButtonEvent.Repeated, function () {
     // Если клавиша зажата, будет выждана пауза прежде чем решить удалять или воспринять это как зажатая клавиша
-    // для этого используется одинаковое название события
     controller.moveSprite(mySprite, 0, 0)
-    cursor.isInvisible(false);
+    cursor.setInvisible(false);
     scene.cameraFollowSprite(cursor)
-    
+
+    // Делается задержка перед повторным перемещением, чтобы не проскакивать слишком далеко
     if (controller.left.isPressed()) {
         timer.debounce('move', 50, () => cursor.controller_handler('left'));
     }
@@ -631,7 +589,7 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
 
 controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
     if (isMove) {
-        cursor.isInvisible(true);
+        cursor.setInvisible(true);
         scene.cameraFollowSprite(mySprite)
         controller.moveSprite(mySprite, 100, 0)
         isRight = false
@@ -640,16 +598,16 @@ controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
 
 controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
     if (isMove) {
-        cursor.isInvisible(true);
+        cursor.setInvisible(true);
         scene.cameraFollowSprite(mySprite)
         controller.moveSprite(mySprite, 100, 0)
         isRight = true
-    }  
+    }
 })
 
 controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
     if (isMove) {
-        cursor.isInvisible(true);
+        cursor.setInvisible(true);
         scene.cameraFollowSprite(mySprite)
         controller.moveSprite(mySprite, 100, 0)
         simplified.gravity_jump(mySprite, -200)
@@ -658,6 +616,78 @@ controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
 
 controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
     if (isMove) {
-        cursor.isInvisible(true);
+        cursor.setInvisible(true);
     }
 })
+
+///////// SCAN /////////
+/**
+ * todo: Сделать прицел на 4 клетки в стороны от персонажа и только доступные по прямой линии
+ * [+] 1) Вычисляем ближайшие 4 тайла
+ * [-] 2) Выстреливаем в углы всех выбранных тайлов
+ * [-] 3) Используем overlap для поиска тех тайлов в хотя бы один из углов которых мы попали
+ * [-] 4) Сохраняем в массив эти тайлы в порядке слева направо
+ * [+] 5) Перед любыми действиями проверять наличие в массиве разрешенных тайлов
+ */
+
+const scan = () => {
+    let radius = 4; // in tiles
+    let { column, row } = mySprite.tilemapLocation();
+    let wallsArray: Array<tiles.Location> = [];
+    let emptyArray: Array<tiles.Location> = [];
+    for (let y = row - radius; y < row + radius; y++) {
+        for (let x = column - radius; x < column + radius; x++) {
+            // todo: Встроить поиск углов каждого тайла и посылку туда выстрела для проверки доступности и только после этого сохранять массивы
+            if (tiles.tileAtLocationIsWall(tiles.getTileLocation(x, y))) {
+                wallsArray.push(tiles.getTileLocation(x, y));
+            } else {
+                emptyArray.push(tiles.getTileLocation(x, y));
+            }
+        }
+    }
+    console.log(`wallsArray:${wallsArray.length}, emptyArray:${emptyArray.length}`)
+    return { walls: wallsArray, empty: emptyArray }
+}
+
+
+
+let angle = 0, increment = 5, radius = 64, speed = 5;
+
+function circlesMove() {
+
+    angle = angle + increment;
+    let vx = radius * Math.cos(angle * Math.PI / 180);
+    let vy = radius * Math.sin(angle * Math.PI / 180);
+    let projectile = sprites.createProjectileFromSprite(img`
+        f
+    `, mySprite, vx * speed, vy * speed)
+    projectile.setFlag(SpriteFlag.BounceOnWall, true)
+
+    scene.onHitWall(SpriteKind.Projectile, function (sprite, location) {
+        sprite.setVelocity(0, 0)
+
+
+        tiles.getTileAt(location.column, location.row).drawRect(0, 0, 16, 16, 4)
+    })
+}
+
+const findAngles = (location: tiles.Location) => {
+    let { x, y } = tiles.getTileLocation(location.column, location.row)
+    const width = 16; // ширина квадрата
+    const halfWidth = width / 2;
+    const topLeftX = x - halfWidth;
+    const topLeftY = y - halfWidth;
+    const topRightX = x + halfWidth;
+    const topRightY = y - halfWidth;
+    const bottomLeftX = x - halfWidth;
+    const bottomLeftY = y + halfWidth;
+    const bottomRightX = x + halfWidth;
+    const bottomRightY = y + halfWidth;
+    
+    return {
+        topLeft: { x: topLeftX, y: topLeftY },
+        topRight: { x: topRightX, y: topRightY },
+        bottomLeft: { x: bottomLeftX, y: bottomLeftY },
+        bottomRight: { x: bottomRightX, y: bottomRightY }
+    };
+}

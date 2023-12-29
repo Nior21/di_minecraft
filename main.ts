@@ -317,10 +317,6 @@ for (let y = 0; y <= 54; y++) {
     allTiles[y] = rowOfTiles
 }
 
-/** Информационная панелька должна работать независимо от курсора
- * курсор возвращает значения
- * Убрать ассеты из курсора и инфопанели
- */
 class Cursor extends Sprite {
     _current_image: Image;
     _current_tile: typeof tiles;
@@ -423,31 +419,21 @@ let cursor = new Cursor(16, img`
 cursor.setPosition(8, 8)
 
 let infoSprite: InfoSprite;
-console.log(`mySprite.flags:${mySprite.flags}`)
-console.log(`SpriteFlag.StayInScreen:${SpriteFlag.StayInScreen}`)
 
 infoSprite = new InfoSprite();
 game.onUpdate(function () {
     // Обновляем положение инфопанели относительно камеры
     infoSprite.updatePosition()
     infoSprite.setInfo(cursor.current_image, 'current tile')
-    
-    timer.throttle("scan", 100, function () {
-        //circlesMove()
-        scan();
-    })
 })
 
 /**
  * todo: Сделать прицел на 4 клетки в стороны от персонажа и только доступные по прямой линии
- * 1) Вычисляем ближайшие 4 тайла
- * 2) Выстреливаем в углы всех выбранных тайлов
- * 3) Используем overlap для поиска тех тайлов в хотя бы один из углов которых мы попали
- * 4) Сохраняем в массив эти тайлы в порядке слева направо
+ * [+] 1) Вычисляем ближайшие 4 тайла
+ * [-] 2) Выстреливаем в углы всех выбранных тайлов
+ * [-] 3) Используем overlap для поиска тех тайлов в хотя бы один из углов которых мы попали
+ * [-] 4) Сохраняем в массив эти тайлы в порядке слева направо
  */
-
-
-
 
 let angle = 0, increment = 5, radius = 64, speed = 5; 
 
@@ -461,9 +447,6 @@ function circlesMove() {
     `, mySprite, vx * speed, vy * speed)
     projectile.setFlag(SpriteFlag.BounceOnWall, true)
 
-    
-
-
     scene.onHitWall(SpriteKind.Projectile, function (sprite, location) {
         sprite.setVelocity(0, 0)
 
@@ -472,15 +455,11 @@ function circlesMove() {
     })
 }
 
-
-//mySprite.tilemapLocation()
-//location.getNeighboringLocation(CollisionDirection.Left)
-
 const scan = () => {
     let radius = 3; // in tiles
     let { column, row } = mySprite.tilemapLocation();
-    let wallsArray: Array<any> = [];
-    let emptyArray: Array<any> = [];
+    let wallsArray: Array<tiles.Location> = [];
+    let emptyArray: Array<tiles.Location> = [];
     for (let y = row - radius; y < row + radius; y++) {
         for (let x = column - radius; x < column + radius; x++) {
             if (tiles.tileAtLocationIsWall(tiles.getTileLocation(x, y))) {
@@ -496,7 +475,11 @@ const scan = () => {
 
 
 const destroyBlock = (location: tiles.Location) => {
-    tiles.setTileAt(location, img`
+    let { walls } = scan();
+    let isFound = walls.some(item => item.column === location.column && item.row === location.row);
+
+    if (isFound) {
+        tiles.setTileAt(location, img`
                 . . . . . . . . . . . . . . . . 
                 . . . . . . . . . . . . . . . . 
                 . . . . . . . . . . . . . . . . 
@@ -514,8 +497,8 @@ const destroyBlock = (location: tiles.Location) => {
                 . . . . . . . . . . . . . . . . 
                 . . . . . . . . . . . . . . . . 
                 `)
-    timer.after(100, function () {
-        tiles.setTileAt(location, img`
+        timer.after(100, function () {
+            tiles.setTileAt(location, img`
                     .3. . . . . . . . . . . 4. . 
                     . 3 3. . . . . . . . . 4 4. . 
                     . 3 d 3. . 4 4. . 4 4 d 4. . 
@@ -533,9 +516,9 @@ const destroyBlock = (location: tiles.Location) => {
                     . 4 5 4. . 4 4 4. . . 4 4. . 
                     . 4 4. . . . . . . . . . 4 4. 
                     `)
-    })
-    timer.after(200, function () {
-        tiles.setTileAt(location, img`
+        })
+        timer.after(200, function () {
+            tiles.setTileAt(location, img`
                     . . . . . . . . . . . . . . . . 
                     . . . . . . . . . . . . . . . . 
                     . . . . .b b.b b b. . . . . 
@@ -553,10 +536,10 @@ const destroyBlock = (location: tiles.Location) => {
                     . . .b b b d d d d d b. . . . 
                     . . . . . .b b b b b. . . . . 
                     `)
-    })
-    timer.after(300, function () {
-        tiles.setWallAt(location, false)
-        tiles.setTileAt(location, img`
+        })
+        timer.after(300, function () {
+            tiles.setWallAt(location, false)
+            tiles.setTileAt(location, img`
             . . . . . . . . . . . . . . . .
             . . . . . . . . . . . . . . . .
             . . . . . . . . . . . . . . . .
@@ -574,32 +557,30 @@ const destroyBlock = (location: tiles.Location) => {
             . . . . . . . . . . . . . . . .
             . . . . . . . . . . . . . . . .
         `)
-    })
+        })
+    }
 }
 
+const createBlock = (location: tiles.Location) => {
+    let { empty } = scan();
+    let isFound = empty.some(item => item.column === location.column && item.row === location.row);
 
+    if (isFound) {
+        tiles.setWallAt(location, true)
+        tiles.setTileAt(location, assets.tile`myTile0`)
+    }
+}
 
+/////// CONTROLLER /////////
 
-
-
-
-////////////////
-// следует перевернуть логику в обратном порядке
-/** Если зажата А, тогда проверять перемещение стрелок
- * Если A не зажата, то по отдельности реакция на каждый тип
- */
+let startTime: number;
+let endTime: number;
 let isMove = true;
-let isReady = true;
 
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     controller.moveSprite(mySprite, 0, 0) // Лишает персонажа возможности двигаться
     isMove = false;
-    isReady = true;
-    if (isReady) {
-        if (mode == 0) {
-            timer.debounce('move', 0, () => { destroyBlock(cursor.tilemapLocation()) })
-        }
-    }
+    startTime = game.runtime();
 })
 
 controller.A.onEvent(ControllerButtonEvent.Repeated, function () {
@@ -608,25 +589,34 @@ controller.A.onEvent(ControllerButtonEvent.Repeated, function () {
     controller.moveSprite(mySprite, 0, 0)
     cursor.isInvisible(false);
     scene.cameraFollowSprite(cursor)
-    isReady = false;
     
     if (controller.left.isPressed()) {
-        timer.debounce('move', 50, () => { cursor.controller_handler('left') })
+        timer.debounce('move', 50, () => cursor.controller_handler('left'));
     }
     if (controller.right.isPressed()) {
-        timer.debounce('move', 50, () => { cursor.controller_handler('right') })
+        timer.debounce('move', 50, () => cursor.controller_handler('right'));
     }
     if (controller.up.isPressed()) {
-        timer.debounce('move', 50, () => { cursor.controller_handler('up') })
+        timer.debounce('move', 50, () => cursor.controller_handler('up'));
     }
     if (controller.down.isPressed()) {
-        timer.debounce('move', 50, () => { cursor.controller_handler('down') })
+        timer.debounce('move', 50, () => cursor.controller_handler('down'));
     }
 })
 
 controller.A.onEvent(ControllerButtonEvent.Released, function () {
+    endTime = game.runtime();
+    if ((endTime - startTime) <= 200) {
+        // todo: добавить условие стена/не стена для этих действий
+        if (mode == 0) {
+            // Уничтожает блоки
+            destroyBlock(cursor.tilemapLocation());
+        } else if (mode == 1) {
+            // Устанавливает блоки
+            createBlock(cursor.tilemapLocation())
+        }
+    }
     isMove = true;
-    isReady = false;
 })
 
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
@@ -665,9 +655,9 @@ controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
         simplified.gravity_jump(mySprite, -200)
     }
 })
+
 controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
     if (isMove) {
         cursor.isInvisible(true);
     }
 })
-

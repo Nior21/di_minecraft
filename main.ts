@@ -506,28 +506,7 @@ game.onUpdate(function () {
  */
 
 
-/**
-class Ray {
-    sprite: Sprite;
-    x: number;
-    y: number;
-    constructor(x: number , y: number) {
-        this.sprite = new Sprite(img`
-            2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
-            2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
-            2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
-            `);
-        this.x = x;
-        this.y = y;
-    }
-    
-}
- */
 
-const lidar = () => {
-    let myLocation = mySprite.tilemapLocation();
-    console.log(myLocation)
-}
 
 let angle = 0, increment = 5, radius = 64, speed = 5; 
 
@@ -633,3 +612,43 @@ function circlesMove() {
 
 //mySprite.tilemapLocation()
 //location.getNeighboringLocation(CollisionDirection.Left)
+
+const lidar = () => {
+    let radius = 3; // in tiles
+    let { column, row } = mySprite.tilemapLocation();
+    let wallsArray: Array<any> = [];
+    let emptyArray: Array<any> = [];
+    for (let y = row - radius; y < row + radius; y++) {
+        for (let x = column - radius; x < column + radius; x++) {
+            if (tiles.tileAtLocationIsWall(tiles.getTileLocation(x, y))) {
+                wallsArray.push(tiles.getTileLocation(x, y));
+            } else {
+                emptyArray.push(tiles.getTileLocation(x, y));
+            }
+        }
+    }
+    console.log(`wallsArray:${wallsArray.length}, emptyArray:${emptyArray.length}`)
+    return { walls: wallsArray, empty: emptyArray}
+}
+
+const destroyBlock = (location: tiles.Location) => {
+    tiles.setWallAt(location, false)
+    tiles.setTileAt(location, img`
+        . . . . . . . . . . . . . . . .
+        . . . . . . . . . . . . . . . .
+        . . . . . . . . . . . . . . . .
+        . . . . . . . . . . . . . . . .
+        . . . . . . . . . . . . . . . .
+        . . . . . . . . . . . . . . . .
+        . . . . . . . . . . . . . . . .
+        . . . . . . . . . . . . . . . .
+        . . . . . . . . . . . . . . . .
+        . . . . . . . . . . . . . . . .
+        . . . . . . . . . . . . . . . .
+        . . . . . . . . . . . . . . . .
+        . . . . . . . . . . . . . . . .
+        . . . . . . . . . . . . . . . .
+        . . . . . . . . . . . . . . . .
+        . . . . . . . . . . . . . . . .
+    `)
+}

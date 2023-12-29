@@ -1,64 +1,7 @@
-controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (controller.A.isPressed()) {
-        cursor.isInvisible(false);
-        scene.cameraFollowSprite(cursor)
-        cursor.controller_handler('up')
-    } else {
-        cursor.isInvisible(true);
-        scene.cameraFollowSprite(mySprite)
-        controller.moveSprite(mySprite, 100, 0)
-        simplified.gravity_jump(mySprite, -200)
-    }
-})
-controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (controller.A.isPressed()) {
-        cursor.isInvisible(false);
-        scene.cameraFollowSprite(mySprite)
-        scene.cameraFollowSprite(cursor)
-        cursor.controller_handler('down')
-    } else {
-        cursor.isInvisible(true);
-    }
-})
 function random (min: number, max: number) {
     out = randint(55 - min, 55 - max)
     return out
 }
-
-controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
-    controller.moveSprite(mySprite, 0, 0)
-    if (текущийРежим < режим.length - 1) {
-        текущийРежим = текущийРежим + 1
-    } else {
-        текущийРежим = 0
-    }
-    info.setScore(текущийРежим)
-})
-controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (controller.A.isPressed()) {
-        cursor.isInvisible(false);
-        scene.cameraFollowSprite(cursor)
-        cursor.controller_handler('left')
-    } else {
-        cursor.isInvisible(true);
-        scene.cameraFollowSprite(mySprite)
-        controller.moveSprite(mySprite, 100, 0)
-        isRight = false
-    }
-})
-
-controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (controller.A.isPressed()) {
-        cursor.isInvisible(false);
-        scene.cameraFollowSprite(cursor)
-        cursor.controller_handler('right')
-    } else {
-        cursor.isInvisible(true);
-        scene.cameraFollowSprite(mySprite)
-        controller.moveSprite(mySprite, 100, 0)
-        isRight = true
-    }
-})
 
 function рандомКарты () {
     генераторБлоков(assets.tile`myTile14`, 1760, 50, 50)
@@ -70,9 +13,7 @@ function рандомКарты () {
     генераторБлоков(assets.tile`myTile0`, 1760, 44, 0)
     генераторДеревьев(10, 51, 51)
 }
-controller.A.onEvent(ControllerButtonEvent.Repeated, function () {
-    controller.moveSprite(mySprite, 0, 0)
-})
+
 function генераторДеревьев (count: number, min: number, max: number) {
     for (let index = 0; index < count; index++) {
         col = randint(0, 55)
@@ -99,7 +40,7 @@ function генераторБлоков (myImage: Image, count: number, min: num
 let row = 0
 let col = 0
 let out = 0
-let текущийРежим = 0
+let mode = 0
 let режим: string[] = []
 let isRight = false
 let mySprite: Sprite = null
@@ -250,7 +191,7 @@ info.setLife(20)
 mySprite.ay = 850
 isRight = true
 режим = ["ставитьБлоки", "долбить"]
-текущийРежим = 0
+mode = 0
 
 class InfoSprite {
     private _sprite: Sprite;
@@ -491,9 +432,9 @@ game.onUpdate(function () {
     infoSprite.updatePosition()
     infoSprite.setInfo(cursor.current_image, 'current tile')
     
-    timer.throttle("action", 100, function () {
+    timer.throttle("scan", 100, function () {
         //circlesMove()
-        lidar();
+        scan();
     })
 })
 
@@ -526,85 +467,7 @@ function circlesMove() {
     scene.onHitWall(SpriteKind.Projectile, function (sprite, location) {
         sprite.setVelocity(0, 0)
 
-        // tiles.setTileAt(location, img`
-        //         . . . . . . . . . . . . . . . . 
-        //         . . . . . . . . . . . . . . . . 
-        //         . . . . . . . . . . . . . . . . 
-        //         . . . . . . . . . . . . . . . . 
-        //         . . . . . . . . . .4. . . . . 
-        //         . . . . 2. . . . 4 4. . . . . 
-        //         . . . . 2 4. . 4 5 4. . . . . 
-        //         . . . . . 2 4 d 5 5 4. . . . . 
-        //         . . . . . 2 5 5 5 5 4. . . . . 
-        //         . . . . . . 2 5 5 5 5 4. . . . 
-        //         . . . . . . 2 5 4 2 4 4. . . . 
-        //         . . . . . . 4 4. . 2 4 4. . . 
-        //         . . . . . 4 4. . . . . . . . . 
-        //         . . . . . . . . . . . . . . . . 
-        //         . . . . . . . . . . . . . . . . 
-        //         . . . . . . . . . . . . . . . . 
-        //         `)
-        // timer.after(100, function () {
-        //     tiles.setTileAt(location, img`
-        //                 .3. . . . . . . . . . . 4. . 
-        //                 . 3 3. . . . . . . . . 4 4. . 
-        //                 . 3 d 3. . 4 4. . 4 4 d 4. . 
-        //                 . . 3 5 3 4 5 5 4 4 d d 4 4. . 
-        //                 . . 3 d 5 d 1 1 d 5 5 d 4 4. . 
-        //                 . . 4 5 5 1 1 1 1 5 1 1 5 4. . 
-        //                 . 4 5 5 5 5 1 1 5 1 1 1 d 4 4. 
-        //                 . 4 d 5 1 1 5 5 5 1 1 1 5 5 4. 
-        //                 . 4 4 5 1 1 5 5 5 5 5 d 5 5 4. 
-        //                 . . 4 3 d 5 5 5 d 5 5 d d d 4. 
-        //                 . 4 5 5 d 5 5 5 d d d 5 5 4. . 
-        //                 . 4 5 5 d 3 5 d d 3 d 5 5 4. . 
-        //                 . 4 4 d d 4 d d d 4 3 d d 4. . 
-        //                 . . 4 5 4 4 4 4 4 4 4 4 4. . . 
-        //                 . 4 5 4. . 4 4 4. . . 4 4. . 
-        //                 . 4 4. . . . . . . . . . 4 4. 
-        //                 `)
-        // })
-        // timer.after(200, function () {
-        //     tiles.setTileAt(location, img`
-        //                 . . . . . . . . . . . . . . . . 
-        //                 . . . . . . . . . . . . . . . . 
-        //                 . . . . .b b.b b b. . . . . 
-        //                 . . . .b 1 1 b 1 1 1 b. . . . 
-        //                 . .b b 3 1 1 d d 1 d d b b. . 
-        //                 .b 1 1 d d b b b b b 1 1 b. . 
-        //                 .b 1 1 1 b. . . . .b d d b. 
-        //                 . . 3 d d b. . . . .b d 1 1 b
-        //         .b 1 d 3. . . . . . .b 1 1 b
-        //         .b 1 1 b. . . . . .b b 1 d b
-        //         .b 1 d b. . . . . .b d 3 d b
-        //         .b b d d b. . . .b d d d b. 
-        //                 .b d d d d b.b b 3 d d 3 b. 
-        //                 . .b d d 3 3 b d 3 3 b b b. . 
-        //                 . . .b b b d d d d d b. . . . 
-        //                 . . . . . .b b b b b. . . . . 
-        //                 `)
-        // })
-        // timer.after(300, function () {
-        //     tiles.setWallAt(location, false)
-        //     tiles.setTileAt(location, img`
-        //         . . . . . . . . . . . . . . . .
-        //         . . . . . . . . . . . . . . . .
-        //         . . . . . . . . . . . . . . . .
-        //         . . . . . . . . . . . . . . . .
-        //         . . . . . . . . . . . . . . . .
-        //         . . . . . . . . . . . . . . . .
-        //         . . . . . . . . . . . . . . . .
-        //         . . . . . . . . . . . . . . . .
-        //         . . . . . . . . . . . . . . . .
-        //         . . . . . . . . . . . . . . . .
-        //         . . . . . . . . . . . . . . . .
-        //         . . . . . . . . . . . . . . . .
-        //         . . . . . . . . . . . . . . . .
-        //         . . . . . . . . . . . . . . . .
-        //         . . . . . . . . . . . . . . . .
-        //         . . . . . . . . . . . . . . . .
-        //     `)
-        // })
+        
         tiles.getTileAt(location.column, location.row).drawRect(0, 0, 16, 16, 4)
     })
 }
@@ -613,7 +476,7 @@ function circlesMove() {
 //mySprite.tilemapLocation()
 //location.getNeighboringLocation(CollisionDirection.Left)
 
-const lidar = () => {
+const scan = () => {
     let radius = 3; // in tiles
     let { column, row } = mySprite.tilemapLocation();
     let wallsArray: Array<any> = [];
@@ -631,24 +494,180 @@ const lidar = () => {
     return { walls: wallsArray, empty: emptyArray}
 }
 
+
 const destroyBlock = (location: tiles.Location) => {
-    tiles.setWallAt(location, false)
     tiles.setTileAt(location, img`
-        . . . . . . . . . . . . . . . .
-        . . . . . . . . . . . . . . . .
-        . . . . . . . . . . . . . . . .
-        . . . . . . . . . . . . . . . .
-        . . . . . . . . . . . . . . . .
-        . . . . . . . . . . . . . . . .
-        . . . . . . . . . . . . . . . .
-        . . . . . . . . . . . . . . . .
-        . . . . . . . . . . . . . . . .
-        . . . . . . . . . . . . . . . .
-        . . . . . . . . . . . . . . . .
-        . . . . . . . . . . . . . . . .
-        . . . . . . . . . . . . . . . .
-        . . . . . . . . . . . . . . . .
-        . . . . . . . . . . . . . . . .
-        . . . . . . . . . . . . . . . .
-    `)
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . .4. . . . . 
+                . . . . 2. . . . 4 4. . . . . 
+                . . . . 2 4. . 4 5 4. . . . . 
+                . . . . . 2 4 d 5 5 4. . . . . 
+                . . . . . 2 5 5 5 5 4. . . . . 
+                . . . . . . 2 5 5 5 5 4. . . . 
+                . . . . . . 2 5 4 2 4 4. . . . 
+                . . . . . . 4 4. . 2 4 4. . . 
+                . . . . . 4 4. . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                `)
+    timer.after(100, function () {
+        tiles.setTileAt(location, img`
+                    .3. . . . . . . . . . . 4. . 
+                    . 3 3. . . . . . . . . 4 4. . 
+                    . 3 d 3. . 4 4. . 4 4 d 4. . 
+                    . . 3 5 3 4 5 5 4 4 d d 4 4. . 
+                    . . 3 d 5 d 1 1 d 5 5 d 4 4. . 
+                    . . 4 5 5 1 1 1 1 5 1 1 5 4. . 
+                    . 4 5 5 5 5 1 1 5 1 1 1 d 4 4. 
+                    . 4 d 5 1 1 5 5 5 1 1 1 5 5 4. 
+                    . 4 4 5 1 1 5 5 5 5 5 d 5 5 4. 
+                    . . 4 3 d 5 5 5 d 5 5 d d d 4. 
+                    . 4 5 5 d 5 5 5 d d d 5 5 4. . 
+                    . 4 5 5 d 3 5 d d 3 d 5 5 4. . 
+                    . 4 4 d d 4 d d d 4 3 d d 4. . 
+                    . . 4 5 4 4 4 4 4 4 4 4 4. . . 
+                    . 4 5 4. . 4 4 4. . . 4 4. . 
+                    . 4 4. . . . . . . . . . 4 4. 
+                    `)
+    })
+    timer.after(200, function () {
+        tiles.setTileAt(location, img`
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . .b b.b b b. . . . . 
+                    . . . .b 1 1 b 1 1 1 b. . . . 
+                    . .b b 3 1 1 d d 1 d d b b. . 
+                    .b 1 1 d d b b b b b 1 1 b. . 
+                    .b 1 1 1 b. . . . .b d d b. 
+                    . . 3 d d b. . . . .b d 1 1 b
+            .b 1 d 3. . . . . . .b 1 1 b
+            .b 1 1 b. . . . . .b b 1 d b
+            .b 1 d b. . . . . .b d 3 d b
+            .b b d d b. . . .b d d d b. 
+                    .b d d d d b.b b 3 d d 3 b. 
+                    . .b d d 3 3 b d 3 3 b b b. . 
+                    . . .b b b d d d d d b. . . . 
+                    . . . . . .b b b b b. . . . . 
+                    `)
+    })
+    timer.after(300, function () {
+        tiles.setWallAt(location, false)
+        tiles.setTileAt(location, img`
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+        `)
+    })
 }
+
+
+
+
+
+
+
+////////////////
+// следует перевернуть логику в обратном порядке
+/** Если зажата А, тогда проверять перемещение стрелок
+ * Если A не зажата, то по отдельности реакция на каждый тип
+ */
+let isMove = true;
+let isReady = true;
+
+controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
+    controller.moveSprite(mySprite, 0, 0) // Лишает персонажа возможности двигаться
+    isMove = false;
+    isReady = true;
+    if (isReady) {
+        if (mode == 0) {
+            timer.debounce('move', 0, () => { destroyBlock(cursor.tilemapLocation()) })
+        }
+    }
+})
+
+controller.A.onEvent(ControllerButtonEvent.Repeated, function () {
+    // Если клавиша зажата, будет выждана пауза прежде чем решить удалять или воспринять это как зажатая клавиша
+    // для этого используется одинаковое название события
+    controller.moveSprite(mySprite, 0, 0)
+    cursor.isInvisible(false);
+    scene.cameraFollowSprite(cursor)
+    isReady = false;
+    
+    if (controller.left.isPressed()) {
+        timer.debounce('move', 50, () => { cursor.controller_handler('left') })
+    }
+    if (controller.right.isPressed()) {
+        timer.debounce('move', 50, () => { cursor.controller_handler('right') })
+    }
+    if (controller.up.isPressed()) {
+        timer.debounce('move', 50, () => { cursor.controller_handler('up') })
+    }
+    if (controller.down.isPressed()) {
+        timer.debounce('move', 50, () => { cursor.controller_handler('down') })
+    }
+})
+
+controller.A.onEvent(ControllerButtonEvent.Released, function () {
+    isMove = true;
+    isReady = false;
+})
+
+controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
+    controller.moveSprite(mySprite, 0, 0)
+    if (mode < режим.length - 1) {
+        mode = mode + 1
+    } else {
+        mode = 0
+    }
+    info.setScore(mode)
+})
+
+controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (isMove) {
+        cursor.isInvisible(true);
+        scene.cameraFollowSprite(mySprite)
+        controller.moveSprite(mySprite, 100, 0)
+        isRight = false
+    }
+})
+
+controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (isMove) {
+        cursor.isInvisible(true);
+        scene.cameraFollowSprite(mySprite)
+        controller.moveSprite(mySprite, 100, 0)
+        isRight = true
+    }  
+})
+
+controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (isMove) {
+        cursor.isInvisible(true);
+        scene.cameraFollowSprite(mySprite)
+        controller.moveSprite(mySprite, 100, 0)
+        simplified.gravity_jump(mySprite, -200)
+    }
+})
+controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (isMove) {
+        cursor.isInvisible(true);
+    }
+})
+

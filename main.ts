@@ -308,17 +308,6 @@ class InfoSprite {
     }
 }
 
-// Собираем информацию обо всех тайлах
-let rowOfTiles: Image[] = []
-let allTiles: Image[][] = []
-for (let y = 0; y <= 54; y++) {
-    rowOfTiles = []
-    for (let x = 0; x <= 54; x++) {
-        rowOfTiles[x] = tiles.tileImageAtLocation(tiles.getTileLocation(x, y))
-    }
-    allTiles[y] = rowOfTiles
-}
-
 ///////// CURSOR /////////
 
 class Cursor extends Sprite {
@@ -350,7 +339,7 @@ class Cursor extends Sprite {
         this.sensitivity = sensitivity;
         this.setInvisible(false);
         // устанавливает исходную картинку как самый левый верхний тайл
-        this._current_image = allTiles[0][0];
+        this._current_image = tiles.tileImageAtLocation(tiles.getTileLocation(0, 0));
     }
 
     controller_handler(direction: string) {
@@ -383,7 +372,7 @@ class Cursor extends Sprite {
         )
 
         // Сохраняем текущий тайл (картинку).
-        this._current_image = allTiles[cursor.tilemapLocation().row][cursor.tilemapLocation().column]
+        this._current_image = tiles.tileImageAtLocation(tiles.getTileLocation(cursor.tilemapLocation().column, cursor.tilemapLocation().row));
     }
 
     get current_image() {
@@ -437,23 +426,23 @@ const destroyBlock = (location: tiles.Location) => {
 
     if (isFound) {
         tiles.setTileAt(location, img`
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . .4. . . . . 
-                . . . . 2. . . . 4 4. . . . . 
-                . . . . 2 4. . 4 5 4. . . . . 
-                . . . . . 2 4 d 5 5 4. . . . . 
-                . . . . . 2 5 5 5 5 4. . . . . 
-                . . . . . . 2 5 5 5 5 4. . . . 
-                . . . . . . 2 5 4 2 4 4. . . . 
-                . . . . . . 4 4. . 2 4 4. . . 
-                . . . . . 4 4. . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                . . . . . . . . . . . . . . . . 
-                `)
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . 4 . . . . .
+            . . . . 2 . . . . 4 4 . . . . .
+            . . . . 2 4 . . 4 5 4 . . . . .
+            . . . . . 2 4 d 5 5 4 . . . . .
+            . . . . . 2 5 5 5 5 4 . . . . .
+            . . . . . . 2 5 5 5 5 4 . . . .
+            . . . . . . 2 5 4 2 4 4 . . . .
+            . . . . . . 4 4 . . 2 4 4 . . .
+            . . . . . 4 4 . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+        `)
         timer.after(100, function () {
             tiles.setTileAt(location, img`
                     .3. . . . . . . . . . . 4. . 
@@ -497,23 +486,23 @@ const destroyBlock = (location: tiles.Location) => {
         timer.after(300, function () {
             tiles.setWallAt(location, false)
             tiles.setTileAt(location, img`
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-        `)
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+            `)
         })
     }
 }
@@ -569,9 +558,28 @@ controller.A.onEvent(ControllerButtonEvent.Released, function () {
         if (mode == 0) {
             // Уничтожает блоки
             destroyBlock(cursor.tilemapLocation());
+            cursor._current_image = img`
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+            `;
         } else if (mode == 1) {
             // Устанавливает блоки
-            createBlock(cursor.tilemapLocation())
+            createBlock(cursor.tilemapLocation());
+            cursor._current_image = tiles.tileImageAtLocation(tiles.getTileLocation(cursor.tilemapLocation().column, cursor.tilemapLocation().row));
         }
     }
     isMove = true;

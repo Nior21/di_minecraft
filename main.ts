@@ -2,18 +2,129 @@ function random (min: number, max: number) {
     out = randint(55 - min, 55 - max)
     return out
 }
+function circlesMove () {
+    angle = angle + increment
+    vx = radius2 * Math.cos(angle * Math.PI / 180)
+    vy = radius2 * Math.sin(angle * Math.PI / 180)
+    projectile = sprites.createProjectileFromSprite(img`
+        f 
+        `, mySprite, vx * speed, vy * speed)
+    projectile.setFlag(SpriteFlag.BounceOnWall, true)
+    scene.onHitWall(SpriteKind.Projectile, function (sprite, location) {
+        sprite.setVelocity(0, 0)
 
+
+        tiles.getTileAt(location.column, location.row).drawRect(0, 0, 16, 16, 4)
+    })
+}
+controller.A.onEvent(ControllerButtonEvent.Repeated, function () {
+    // Если клавиша зажата, будет выждана пауза прежде чем решить удалять или воспринять это как зажатая клавиша
+    controller.moveSprite(mySprite, 0, 0)
+    cursor.setInvisible(false);
+scene.cameraFollowSprite(cursor)
+    // Делается задержка перед повторным перемещением, чтобы не проскакивать слишком далеко
+    if (controller.left.isPressed()) {
+        timer.debounce("move", 50, function () {
+            cursor.controller_handler('left')
+        })
+    }
+    if (controller.right.isPressed()) {
+        timer.debounce("move", 50, function () {
+            cursor.controller_handler('right')
+        })
+    }
+    if (controller.up.isPressed()) {
+        timer.debounce("move", 50, function () {
+            cursor.controller_handler('up')
+        })
+    }
+    if (controller.down.isPressed()) {
+        timer.debounce("move", 50, function () {
+            cursor.controller_handler('down')
+        })
+    }
+})
+controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
+    controller.moveSprite(mySprite, 0, 0)
+    if (mode < режим.length - 1) {
+        mode = mode + 1
+    } else {
+        mode = 0
+    }
+    info.setScore(mode)
+})
+controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (isMove) {
+        cursor.setInvisible(true);
+scene.cameraFollowSprite(mySprite)
+        controller.moveSprite(mySprite, 100, 0)
+        isRight = true
+    }
+})
+controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (isMove) {
+        cursor.setInvisible(true);
+scene.cameraFollowSprite(mySprite)
+        controller.moveSprite(mySprite, 100, 0)
+        isRight = false
+    }
+})
+controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
+    // Лишает персонажа возможности двигаться
+    controller.moveSprite(mySprite, 0, 0)
+    cursor.setInvisible(false);
+isMove = false
+    startTime = game.runtime()
+})
 function рандомКарты () {
     генераторБлоков(assets.tile`myTile14`, 1760, 50, 50)
     генераторБлоков(assets.tile`myTile7`, 1760, 49, 45)
-    генераторБлоков(assets.tile`myTile9`, 1760, 0, 16)
-    генераторБлоков(assets.tile`myTile4`, 1760, 0, 32)
-    генераторБлоков(assets.tile`myTile6`, 1760, 0, 44)
-    генераторБлоков(assets.tile`myTile16`, 1760, 0, 44)
     генераторБлоков(assets.tile`myTile0`, 1760, 44, 0)
+    генераторБлоков(assets.tile`myTile20`, 30, 0, 16)
+    генераторБлоков(assets.tile`myTile9`, 50, 0, 16)
+    генераторБлоков(assets.tile`myTile4`, 90, 0, 32)
+    генераторБлоков(assets.tile`myTile19`, 130, 0, 28)
+    генераторБлоков(assets.tile`myTile18`, 170, 0, 32)
+    генераторБлоков(assets.tile`myTile6`, 200, 0, 44)
+    генераторБлоков(assets.tile`myTile16`, 260, 0, 44)
     генераторДеревьев(10, 51, 51)
 }
-
+controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (isMove) {
+        cursor.setInvisible(true);
+    }
+})
+controller.A.onEvent(ControllerButtonEvent.Released, function () {
+    endTime = game.runtime()
+    if (endTime - startTime <= 200) {
+        // todo: добавить условие стена/не стена для этих действий
+        if (mode == 0) {
+            destroyBlock(cursor.tilemapLocation());
+cursor._current_image = img`
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+            `;
+        } else if (mode == 1) {
+            createBlock(cursor.tilemapLocation());
+cursor._current_image = tiles.tileImageAtLocation(tiles.getTileLocation(cursor.tilemapLocation().column, cursor.tilemapLocation().row));
+        }
+    }
+    isMove = true
+})
 function генераторДеревьев (count: number, min: number, max: number) {
     for (let index = 0; index < count; index++) {
         col = randint(0, 55)
@@ -37,13 +148,29 @@ function генераторБлоков (myImage: Image, count: number, min: num
         tiles.setWallAt(tiles.getTileLocation(col, row), true)
     }
 }
-let row = 0
+controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (isMove) {
+        cursor.setInvisible(true);
+scene.cameraFollowSprite(mySprite)
+        controller.moveSprite(mySprite, 100, 0)
+        simplified.gravity_jump(mySprite, -200)
+    }
+})
 let col = 0
+let projectile: Sprite = null
+let vy = 0
+let vx = 0
+let angle = 0
 let out = 0
+let speed = 0
+let radius2 = 0
+let increment = 0
+let isMove = false
 let mode = 0
 let режим: string[] = []
 let isRight = false
 let mySprite: Sprite = null
+let row = 0
 tiles.setCurrentTilemap(tilemap`level1`)
 scene.setBackgroundImage(img`
     9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
@@ -192,9 +319,6 @@ mySprite.ay = 850
 isRight = true
 режим = ["ставитьБлоки", "долбить"]
 mode = 0
-
-///////// INFO PANEL /////////
-
 class InfoSprite {
     private _sprite: Sprite;
     private _image_info: Sprite; // Картинка выделенного объекта
@@ -307,9 +431,6 @@ class InfoSprite {
         }
     }
 }
-
-///////// CURSOR /////////
-
 class Cursor extends Sprite {
     _current_image: Image;
     _current_tile: typeof tiles;
@@ -390,7 +511,6 @@ class Cursor extends Sprite {
         }
     }
 }
-
 let cursor = new Cursor(16, img`
 2 . 2 2 2 2 2 2 2 2 2 2 2 2 . 2 
 . . . . . . . . . . . . . . . . 
@@ -410,16 +530,8 @@ let cursor = new Cursor(16, img`
 2 . 2 2 2 2 2 2 2 2 2 2 2 2 . 2 
 `);
 cursor.setPosition(8, 8)
-
 let infoSprite: InfoSprite;
-
 infoSprite = new InfoSprite();
-game.onUpdate(function () {
-    // Обновляем положение инфопанели относительно камеры
-    infoSprite.updatePosition()
-    infoSprite.setInfo(cursor.current_image, 'current tile')
-})
-
 const destroyBlock = (location: tiles.Location) => {
     let { walls } = scan();
     let isFound = walls.some(item => item.column === location.column && item.row === location.row);
@@ -506,138 +618,18 @@ const destroyBlock = (location: tiles.Location) => {
         })
     }
 }
-
 const createBlock = (location: tiles.Location) => {
     let { empty } = scan();
-    let isFound = empty.some(item => item.column === location.column && item.row === location.row);
+    let isFound2 = empty.some(item => item.column === location.column && item.row === location.row);
 
-    if (isFound) {
+    if (isFound2) {
         tiles.setWallAt(location, true)
         tiles.setTileAt(location, assets.tile`myTile0`)
     }
 }
-
-///////// CONTROLLER /////////
-
 let startTime: number;
 let endTime: number;
-let isMove = true;
-
-controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
-    controller.moveSprite(mySprite, 0, 0) // Лишает персонажа возможности двигаться
-    cursor.setInvisible(false);
-    isMove = false;
-    startTime = game.runtime();
-})
-
-controller.A.onEvent(ControllerButtonEvent.Repeated, function () {
-    // Если клавиша зажата, будет выждана пауза прежде чем решить удалять или воспринять это как зажатая клавиша
-    controller.moveSprite(mySprite, 0, 0)
-    cursor.setInvisible(false);
-    scene.cameraFollowSprite(cursor)
-
-    // Делается задержка перед повторным перемещением, чтобы не проскакивать слишком далеко
-    if (controller.left.isPressed()) {
-        timer.debounce('move', 50, () => cursor.controller_handler('left'));
-    }
-    if (controller.right.isPressed()) {
-        timer.debounce('move', 50, () => cursor.controller_handler('right'));
-    }
-    if (controller.up.isPressed()) {
-        timer.debounce('move', 50, () => cursor.controller_handler('up'));
-    }
-    if (controller.down.isPressed()) {
-        timer.debounce('move', 50, () => cursor.controller_handler('down'));
-    }
-})
-
-controller.A.onEvent(ControllerButtonEvent.Released, function () {
-    endTime = game.runtime();
-    if ((endTime - startTime) <= 200) {
-        // todo: добавить условие стена/не стена для этих действий
-        if (mode == 0) {
-            // Уничтожает блоки
-            destroyBlock(cursor.tilemapLocation());
-            cursor._current_image = img`
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-            `;
-        } else if (mode == 1) {
-            // Устанавливает блоки
-            createBlock(cursor.tilemapLocation());
-            cursor._current_image = tiles.tileImageAtLocation(tiles.getTileLocation(cursor.tilemapLocation().column, cursor.tilemapLocation().row));
-        }
-    }
-    isMove = true;
-})
-
-controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
-    controller.moveSprite(mySprite, 0, 0)
-    if (mode < режим.length - 1) {
-        mode = mode + 1
-    } else {
-        mode = 0
-    }
-    info.setScore(mode)
-})
-
-controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (isMove) {
-        cursor.setInvisible(true);
-        scene.cameraFollowSprite(mySprite)
-        controller.moveSprite(mySprite, 100, 0)
-        isRight = false
-    }
-})
-
-controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (isMove) {
-        cursor.setInvisible(true);
-        scene.cameraFollowSprite(mySprite)
-        controller.moveSprite(mySprite, 100, 0)
-        isRight = true
-    }
-})
-
-controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (isMove) {
-        cursor.setInvisible(true);
-        scene.cameraFollowSprite(mySprite)
-        controller.moveSprite(mySprite, 100, 0)
-        simplified.gravity_jump(mySprite, -200)
-    }
-})
-
-controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (isMove) {
-        cursor.setInvisible(true);
-    }
-})
-
-///////// SCAN /////////
-/**
- * todo: Сделать прицел на 4 клетки в стороны от персонажа и только доступные по прямой линии
- * [+] 1) Вычисляем ближайшие 4 тайла
- * [-] 2) Выстреливаем в углы всех выбранных тайлов
- * [-] 3) Используем overlap для поиска тех тайлов в хотя бы один из углов которых мы попали
- * [-] 4) Сохраняем в массив эти тайлы в порядке слева направо
- * [+] 5) Перед любыми действиями проверять наличие в массиве разрешенных тайлов
- */
-
+isMove = true
 const scan = () => {
     let radius = 4; // in tiles
     let { column, row } = mySprite.tilemapLocation();
@@ -656,29 +648,9 @@ const scan = () => {
     console.log(`wallsArray:${wallsArray.length}, emptyArray:${emptyArray.length}`)
     return { walls: wallsArray, empty: emptyArray }
 }
-
-
-
-let angle = 0, increment = 5, radius = 64, speed = 5;
-
-function circlesMove() {
-
-    angle = angle + increment;
-    let vx = radius * Math.cos(angle * Math.PI / 180);
-    let vy = radius * Math.sin(angle * Math.PI / 180);
-    let projectile = sprites.createProjectileFromSprite(img`
-        f
-    `, mySprite, vx * speed, vy * speed)
-    projectile.setFlag(SpriteFlag.BounceOnWall, true)
-
-    scene.onHitWall(SpriteKind.Projectile, function (sprite, location) {
-        sprite.setVelocity(0, 0)
-
-
-        tiles.getTileAt(location.column, location.row).drawRect(0, 0, 16, 16, 4)
-    })
-}
-
+increment = 5
+radius2 = 64
+speed = 5
 const findAngles = (location: tiles.Location) => {
     let { x, y } = tiles.getTileLocation(location.column, location.row)
     const width = 16; // ширина квадрата
@@ -699,3 +671,7 @@ const findAngles = (location: tiles.Location) => {
         bottomRight: { x: bottomRightX, y: bottomRightY }
     };
 }
+game.onUpdate(function () {
+    infoSprite.updatePosition()
+infoSprite.setInfo(cursor.current_image, 'current tile')
+})

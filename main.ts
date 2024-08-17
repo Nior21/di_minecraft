@@ -2,6 +2,7 @@ function random (min: number, max: number) {
     out = randint(55 - min, 55 - max)
     return out
 }
+//todo: проверить функцию, скорее всего бесполезная
 function circlesMove () {
     angle = angle + increment
     vx = radius2 * Math.cos(angle * Math.PI / 180)
@@ -73,7 +74,7 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     // Лишает персонажа возможности двигаться
     controller.moveSprite(mySprite, 0, 0)
     cursor.setInvisible(false);
-isMove = false
+    isMove = false
     startTime = game.runtime()
 })
 function рандомКарты () {
@@ -120,7 +121,7 @@ cursor._current_image = img`
             `;
         } else if (mode == 1) {
             createBlock(cursor.tilemapLocation());
-cursor._current_image = tiles.tileImageAtLocation(tiles.getTileLocation(cursor.tilemapLocation().column, cursor.tilemapLocation().row));
+            cursor._current_image = tiles.tileImageAtLocation(tiles.getTileLocation(cursor.tilemapLocation().column, cursor.tilemapLocation().row));
         }
     }
     isMove = true
@@ -151,7 +152,7 @@ function генераторБлоков (myImage: Image, count: number, min: num
 controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
     if (isMove) {
         cursor.setInvisible(true);
-scene.cameraFollowSprite(mySprite)
+        scene.cameraFollowSprite(mySprite)
         controller.moveSprite(mySprite, 100, 0)
         simplified.gravity_jump(mySprite, -200)
     }
@@ -293,7 +294,7 @@ scene.setBackgroundImage(img`
     9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
     9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
     9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
-    `)
+`)
 mySprite = sprites.create(img`
     . . . . . . f f f f . . . . . . 
     . . . . f f f 2 2 f f f . . . . 
@@ -340,7 +341,7 @@ class InfoSprite {
         cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
         cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
         cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-        `
+    `
     private hidden_info: Image = img`
         ................................................................................................................................................................
         ................................................................................................................................................................
@@ -672,6 +673,6 @@ const findAngles = (location: tiles.Location) => {
     };
 }
 game.onUpdate(function () {
-    infoSprite.updatePosition()
-infoSprite.setInfo(cursor.current_image, 'current tile')
+    infoSprite.updatePosition();
+    infoSprite.setInfo(cursor.current_image, 'current tile')
 })

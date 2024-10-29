@@ -2,7 +2,7 @@ function random (min: number, max: number) {
     out = randint(55 - min, 55 - max)
     return out
 }
-//todo: проверить функцию, скорее всего бесполезная
+// todo: проверить функцию, скорее всего бесполезная
 function circlesMove () {
     angle = angle + increment
     vx = radius2 * Math.cos(angle * Math.PI / 180)
@@ -74,7 +74,7 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     // Лишает персонажа возможности двигаться
     controller.moveSprite(mySprite, 0, 0)
     cursor.setInvisible(false);
-    isMove = false
+isMove = false
     startTime = game.runtime()
 })
 function рандомКарты () {
@@ -121,7 +121,7 @@ cursor._current_image = img`
             `;
         } else if (mode == 1) {
             createBlock(cursor.tilemapLocation());
-            cursor._current_image = tiles.tileImageAtLocation(tiles.getTileLocation(cursor.tilemapLocation().column, cursor.tilemapLocation().row));
+cursor._current_image = tiles.tileImageAtLocation(tiles.getTileLocation(cursor.tilemapLocation().column, cursor.tilemapLocation().row));
         }
     }
     isMove = true
@@ -141,10 +141,14 @@ function генераторДеревьев (count: number, min: number, max: nu
         tiles.setTileAt(tiles.getTileLocation(col - 1, row - 4), assets.tile`myTile15`)
     }
 }
-function генераторБлоков (myImage: Image, count: number, min: number, max: number) {
-    for (let index = 0; index < count; index++) {
+function генераторБлоков (myImage: Image, maxCount: number, min: number, max: number) {
+    let count = 0;
+    while (count < maxCount) {
         col = randint(0, 55)
         row = random(min, max)
+        // Проверить наличие блока в месте генерации перед установкой блока. Если есть то отказаться и сгенерировать координаты повторно
+        // Генерировать по циклу относительно count, увеличивать count в случае успеха.
+        console.log(tiles.tileImageAtLocation(tiles.getTileLocation(col, row)))
         tiles.setTileAt(tiles.getTileLocation(col, row), myImage)
         tiles.setWallAt(tiles.getTileLocation(col, row), true)
     }
@@ -152,7 +156,7 @@ function генераторБлоков (myImage: Image, count: number, min: num
 controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
     if (isMove) {
         cursor.setInvisible(true);
-        scene.cameraFollowSprite(mySprite)
+scene.cameraFollowSprite(mySprite)
         controller.moveSprite(mySprite, 100, 0)
         simplified.gravity_jump(mySprite, -200)
     }
@@ -170,8 +174,8 @@ let isMove = false
 let mode = 0
 let режим: string[] = []
 let isRight = false
-let mySprite: Sprite = null
 let row = 0
+let mySprite: Sprite = null
 tiles.setCurrentTilemap(tilemap`level1`)
 scene.setBackgroundImage(img`
     9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
@@ -294,7 +298,7 @@ scene.setBackgroundImage(img`
     9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
     9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
     9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
-`)
+    `)
 mySprite = sprites.create(img`
     . . . . . . f f f f . . . . . . 
     . . . . f f f 2 2 f f f . . . . 
@@ -672,7 +676,23 @@ const findAngles = (location: tiles.Location) => {
         bottomRight: { x: bottomRightX, y: bottomRightY }
     };
 }
+class BlocksMap {
+    // Задаем базовый массив который можно будет получать обращаясь по имени к экземпляру класса
+    _map: Array<number>;
+    constructor () {
+        this._map = [1, 2, 3];
+    }
+    get map() {
+        return this._map;
+    };
+}
+class Block {
+    
+}
+const map1 = new BlocksMap
+const map2 = new BlocksMap
 game.onUpdate(function () {
     infoSprite.updatePosition();
     infoSprite.setInfo(cursor.current_image, 'current tile')
+
 })

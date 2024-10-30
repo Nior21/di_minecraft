@@ -673,5 +673,14 @@ const findAngles = (location: tiles.Location) => {
 }
 game.onUpdate(function () {
     infoSprite.updatePosition()
-infoSprite.setInfo(cursor.current_image, 'current tile')
+    infoSprite.setInfo(cursor.current_image, 'current tile')
 })
+
+/** Генерируем блоки по новому
+ * Нужно создать новый тип тайлов с описанием типа
+ * Нужно создать новый объект для списка тайлов к которому можно обращаться по координатам и вызывать его функции
+ */
+
+class Block extends tiles.Tile {
+       
+}

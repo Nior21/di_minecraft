@@ -1,10 +1,382 @@
-// Создаем базовый пустой TileMap и следовательно его размеры
-tiles.setCurrentTilemap(tilemap`level1`);
+class Block {
+    // Статическое перечисление типов блоков
+    static BlockType = {
+        Empty: 'Empty',
+        Stone: 'Stone',
+        Wood: 'Wood',
+        Gold: 'Gold',
+        Dirt: 'Dirt',
+        Grass: 'Grass',
+    };
 
-// Задаем размеры нарисованного TileMap (Важно! Если изменить картинку может быть сбой)
-const mapWidth = 64;
-const mapHeight = 64;
+    // Конфигурация для каждого типа блока
+    private static blockConfigs = {
+        Empty: {
+            isWall: false, image: img`
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+                . . . . . . . . . . . . . . . .
+            ` },
+        Stone: {
+            isWall: true, image: img`
+                c c c c c c c c c c c c c c c c 
+                c b d d d d d d d b d d d d d c 
+                c d b d d d d d b d d d d b d c 
+                c d d b d d d d b d d d b d d c 
+                c d d d b d d b d d d d b d d c 
+                c d d d b d d b d d d d b d d c 
+                c b d d d b d b d d d b d d d c 
+                c d b b d d b d d d d b d d d c 
+                c d d d b d b b d d d b d d d c 
+                c d d d d b b d b d b d d d d c 
+                c d d d d b d b d b b d d d d c 
+                c d d d b d d d b b b d d d d c 
+                c d d d b d d d d d b d d d d c 
+                c d d d b d d d d b d b b d d c 
+                c d d b d d d d d b d d d b d c 
+                c c c c c c c c c c c c c c c c 
+                ` },
+        Wood: {
+            isWall: false, image: img`
+                . e e e e e e e e e e e e e e . 
+                . e e e e e e e e e e e e e e . 
+                . e e e e e e e e e e e e e e . 
+                . e e e e e e e e e e e e e e . 
+                . e e e e e e e e e e e e e e . 
+                . e e e e e e e e e e e e e e . 
+                . e e e e e e e e e e e e e e . 
+                . e e e e e e e e e e e e e e . 
+                . e e e e e e e e e e e e e e . 
+                . e e e e e e e e e e e e e e . 
+                . e e e e e e e e e e e e e e . 
+                . e e e e e e e e e e e e e e . 
+                . e e e e e e e e e e e e e e . 
+                . e e e e e e e e e e e e e e . 
+                . e e e e e e e e e e e e e e . 
+                . e e e e e e e e e e e e e e . 
+                ` },
+        Gold: {
+            isWall: true, image: img`
+                c c c c c c c c c c c c c c c c 
+                c b d d d d d d d b d d d d d c 
+                c d b d d 5 5 5 b d d d d b d c 
+                c d d b d 5 5 5 b d d d b d d c 
+                c 5 5 d b d d b d d 5 d b d d c 
+                c 5 d d b d d b d d 5 5 b d d c 
+                c b d d d b d b d d 5 5 d d d c 
+                c d b b d d 5 d d d 5 5 d d d c 
+                c d d d b d 5 b d d 5 b d 5 d c 
+                c d 5 5 5 b 5 5 b d b d d 5 5 c 
+                c d d d d b d b d b b d d 5 5 c 
+                c d d d b d d d b b b d d d d c 
+                c 5 d d b d d d 5 5 5 5 5 5 d c 
+                c 5 d d b d d d 5 5 5 5 5 d d c 
+                c 5 d b d d d d d b d d d b d c 
+                c c c c c c c c c c c c c c c c 
+                ` },
+        Dirt: {
+            isWall: true, image: img`
+                e e e e e e e e e e e e e e e e 
+                e e e e e e e e e f e e e e e e 
+                e e e e e e e e e e e e e e e e 
+                e e e e e e e f e e e e e e e e 
+                e e e e f e e e e e e e e e e f 
+                e e e e e e e e e e e e e e e e 
+                e e e e e e e e e e e e e e e e 
+                e e e e e e e e f e e f e e e e 
+                e e e e e f e e e e e e e e e e 
+                e e e e e e e e e e e e e e e e 
+                e e e e e e e e e e e e e e e e 
+                e e e e e e e e f e e e e e e e 
+                e e e e e e e e e e e e e e e e 
+                e e e e e e e e e e e e e e e e 
+                e e e e e e e e e e e e e e e e 
+                e e e e e e e e e e e e e e e e 
+                ` },
+        Grass: {
+            isWall: true, image: img`
+                7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 
+                7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 
+                7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 
+                e e e e e e e e e e e e e e e e 
+                e e e f e e e e e e e e e e e e 
+                e e e e e e e e e e e e f e e e 
+                e e e e e f e e f e e e e e e e 
+                e f e e e e e e e e e e e e e e 
+                e e e e e e e e e e e f e e f f 
+                e e e f e f e e e e e e e e e e 
+                e e e e e e e e e e e e e e e e 
+                e e e e e e e e f e e e e f e e 
+                e e e e e e e e e e e e e e e e 
+                e f e e e f e e e e e e e e e e 
+                e e e e e e e e e f e e e e e e 
+                e e e e e e e e e e e e e e e e 
+                ` },
+    };
 
+    //TODO: Возможно значения брать надо из конфига, а не из отдельных переменных
+    _image: Image;
+    _isWall: boolean;
+    _blockType: keyof typeof Block.BlockType;
+    _x: number;
+    _y: number;
+    _location: tiles.Location;
+    _chank: Chank;
+    constructor(chank: Chank, blockType?: keyof typeof Block.BlockType, location?: tiles.Location) {
+        // Если не указан тип, то это воспринимается как пустота, система не позволяет указать вариант по-умолчанию
+        if (blockType == undefined) {
+            blockType = "Empty";
+        }
+        // Проверяем наличие указания локации, если нету, то возвращаем координаты 0:0
+        this._location = location ? location : tiles.getTileLocation(0, 0);
+
+        this._chank = chank;
+
+        this._render(blockType);
+    }
+
+    // Воруем все функции из tilemap и добавляем свои
+
+    // Известно что за объект добыт
+
+    // Проверка принадлежности выбранных координат к группе блоков в указанном радиусе
+    checkDistance = (targetLocation: tiles.Location, radius?: number, myLocation?: tiles.Location) => {
+        // Проверка инициализации персонажа (если нет, то берутся координаты 0,0)
+        let { column, row } = myLocation ? myLocation : tiles.getTileLocation(0, 0);
+        // Проверка заполнения radius
+        let _radius = radius ? radius : 4;
+        // Проверяем диапазон тайлов в указанном радиусе (проверяем isWall, т.к. у истинно пустых координат не будет этого параметра)
+        for (let y = row - _radius; y < row + _radius; y++) {
+            for (let x = column - _radius; x < column + _radius; x++) {
+                console.log(tiles.tileAtLocationIsWall(tiles.getTileLocation(x, y)));
+                return tiles.tileAtLocationIsWall(tiles.getTileLocation(x, y)) != undefined;
+            }
+        }
+        return false;
+    }
+
+    // Установка блоков
+    createBlock(blockType: keyof typeof Block.BlockType) {
+        let isMatch = this.checkDistance(this.location, 4); // Наличие в радиусе 4 клеток
+
+        if (isMatch) {
+            // Проверка имеет ли блок тип Empty
+            const block = this.chank.getBlock(this.location);
+            if (block.blockType == "Empty") {
+                this._render(block.blockType); // присваиваем блоку новое значение и рендерим изменение
+            };
+        }
+    }
+
+    destroyBlock() {
+        let isMatch = this.checkDistance(this.location, 4); // Наличие в радиусе 4 клеток
+        let oldType: keyof typeof Block.BlockType;
+        if (isMatch) {
+            // Проверка имеет ли блок тип Empty
+            const block = this.chank.getBlock(this.location);
+            oldType = block.blockType;
+            if (block.blockType != "Empty") {
+                tiles.setTileAt(this.location, img`
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . 4 . . . . .
+            . . . . 2 . . . . 4 4 . . . . .
+            . . . . 2 4 . . 4 5 4 . . . . .
+            . . . . . 2 4 d 5 5 4 . . . . .
+            . . . . . 2 5 5 5 5 4 . . . . .
+            . . . . . . 2 5 5 5 5 4 . . . .
+            . . . . . . 2 5 4 2 4 4 . . . .
+            . . . . . . 4 4 . . 2 4 4 . . .
+            . . . . . 4 4 . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+            . . . . . . . . . . . . . . . .
+        `)
+                timer.after(100, function () {
+                    tiles.setTileAt(this.location, img`
+                    .3. . . . . . . . . . . 4. . 
+                    . 3 3. . . . . . . . . 4 4. . 
+                    . 3 d 3. . 4 4. . 4 4 d 4. . 
+                    . . 3 5 3 4 5 5 4 4 d d 4 4. . 
+                    . . 3 d 5 d 1 1 d 5 5 d 4 4. . 
+                    . . 4 5 5 1 1 1 1 5 1 1 5 4. . 
+                    . 4 5 5 5 5 1 1 5 1 1 1 d 4 4. 
+                    . 4 d 5 1 1 5 5 5 1 1 1 5 5 4. 
+                    . 4 4 5 1 1 5 5 5 5 5 d 5 5 4. 
+                    . . 4 3 d 5 5 5 d 5 5 d d d 4. 
+                    . 4 5 5 d 5 5 5 d d d 5 5 4. . 
+                    . 4 5 5 d 3 5 d d 3 d 5 5 4. . 
+                    . 4 4 d d 4 d d d 4 3 d d 4. . 
+                    . . 4 5 4 4 4 4 4 4 4 4 4. . . 
+                    . 4 5 4. . 4 4 4. . . 4 4. . 
+                    . 4 4. . . . . . . . . . 4 4. 
+                    `)
+                })
+                timer.after(200, function () {
+                    tiles.setTileAt(this.location, img`
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . 
+                    . . . . .b b.b b b. . . . . 
+                    . . . .b 1 1 b 1 1 1 b. . . . 
+                    . .b b 3 1 1 d d 1 d d b b. . 
+                    .b 1 1 d d b b b b b 1 1 b. . 
+                    .b 1 1 1 b. . . . .b d d b. 
+                    . . 3 d d b. . . . .b d 1 1 b
+                    .b 1 d 3. . . . . . .b 1 1 b
+                    .b 1 1 b. . . . . .b b 1 d b
+                    .b 1 d b. . . . . .b d 3 d b
+                    .b b d d b. . . .b d d d b. 
+                    .b d d d d b.b b 3 d d 3 b. 
+                    . .b d d 3 3 b d 3 3 b b b. . 
+                    . . .b b b d d d d d b. . . . 
+                    . . . . . .b b b b b. . . . . 
+                    `)
+                })
+                timer.after(300, function () {
+                    tiles.setTileAt(this.location, img`
+                    . . . . . . . . . . . . . . . .
+                    . . . . . . . . . . . . . . . .
+                    . . . . . . . . . . . . . . . .
+                    . . . . . . . . . . . . . . . .
+                    . . . . . . . . . . . . . . . .
+                    . . . . . . . . . . . . . . . .
+                    . . . . . . . . . . . . . . . .
+                    . . . . . . . . . . . . . . . .
+                    . . . . . . . . . . . . . . . .
+                    . . . . . . . . . . . . . . . .
+                    . . . . . . . . . . . . . . . .
+                    . . . . . . . . . . . . . . . .
+                    . . . . . . . . . . . . . . . .
+                    . . . . . . . . . . . . . . . .
+                    . . . . . . . . . . . . . . . .
+                    . . . . . . . . . . . . . . . .
+                `)
+                })
+                this._render("Empty"); // присваиваем блоку новое значение и рендерим изменение
+            };
+        } else {
+            return undefined;
+        }
+        return oldType;
+    }
+
+    // Присваиваем блоку новое значение и рендерим изменение
+    _render(blockType: keyof typeof Block.BlockType) {
+        // Проверяем наличие указанного типа, если нету, возвращаем ошибку
+        this._blockType = blockType;
+
+        // Загружаем новый конфиг и сохраняем параметры из него во временные переменные
+        const config = Block.blockConfigs[blockType];
+        this._isWall = config.isWall;
+        this._image = config.image;
+
+        // Рендерим блок с использованием стандартных функций
+        tiles.setTileAt(this._location, this._image);
+    }
+
+    // Чтение и установка параметра "Стена"
+    get isWall() {
+        return this._isWall;
+    }
+    set isWall(value: boolean) {
+        this._isWall = value;
+    }
+
+    get blockType() {
+        return this._blockType;
+    }
+    set blockType(value: keyof typeof Block.BlockType) {
+        this._blockType = value;
+        // Изменять картинку при изменении типа
+        tiles.setTileAt(this._location, this._image); // Рендерим блок с использованием стандартных функций
+    }
+
+    get location() {
+        return this._location;
+    }
+    set location(value: tiles.Location) {
+        this._location = value;
+    }
+
+    get chank() {
+        return this._chank;
+    }
+    set chank(value: Chank) {
+        this._chank = value;
+    }
+
+    get image() {
+        return this._image;
+    }
+}
+class Chank {
+    _width: number;
+    _height: number;
+    _map: Array<Array<Block>>;
+    _startLocation: tiles.Location;
+    _endLocation: tiles.Location;
+
+    constructor(width: number = 2, height: number = 2) {
+        this._width = width;
+        this._height = height;
+        // Генерация карты заданного размера из блоков "воздуха"
+        this._map = this._generateEmptyMap();
+    }
+
+    _generateEmptyMap() {
+        const array = [];
+        for (let y2 = 0; y2 < this._height; y2++) {
+            const row = [];
+            for (let x2 = 0; x2 < this._width; x2++) {
+                row.push(new Block(this, "Stone", tiles.getTileLocation(x2, y2)));
+            }
+            array.push(row);
+        }
+        return array;
+    }
+
+    getBlock(location: tiles.Location) {
+        const { column, row } = location;
+        console.log(this._map[row][column].blockType);
+        console.log(this._map[row][column].isWall);
+        return this._map[row][column];
+    }
+
+    get width() {
+        return this._width;
+    }
+    get height() {
+        return this._height;
+    }
+    set width(value: number) {
+        this._width = value;
+    }
+    set height(value: number) {
+        this._height = value;
+    }
+
+    // Метод проверки принадлежности к диапазону
+
+    // Генерация без накладывания (точный подсчет кол-ва)
+    // Текучие блоки
+}
+// НАСТРОЙКИ ИГРЫ (константы)
+// ИНИЦИАЛИЗАЦИЯ ИГРЫ
 // Задаем фоновую картинку уровня вместо черноты
 scene.setBackgroundImage(img`
     9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
@@ -128,591 +500,16 @@ scene.setBackgroundImage(img`
     9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
     9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
     `)
-
-// Задаем иконку персонажа
-let mySprite = sprites.create(img`
-    . . . . . . f f f f . . . . . . 
-    . . . . f f f 2 2 f f f . . . . 
-    . . . f f f 2 2 2 2 f f f . . . 
-    . . f f f e e e e e e f f f . . 
-    . . f f e 2 2 2 2 2 2 e e f . . 
-    . . f e 2 f f f f f f 2 e f . . 
-    . . f f f f e e e e f f f f . . 
-    . f f e f b f 4 4 f b f e f f . 
-    . f e e 4 1 f d d f 1 4 e e f . 
-    . . f e e d d d d d d e e f . . 
-    . . . f e e 4 4 4 4 e e f . . . 
-    . . e 4 f 2 2 2 2 2 2 f 4 e . . 
-    . . 4 d f 2 2 2 2 2 2 f d 4 . . 
-    . . 4 4 f 4 4 5 5 4 4 f 4 4 . . 
-    . . . . . f f f f f f . . . . . 
-    . . . . . f f . . f f . . . . . 
-    `, SpriteKind.Player);
-
-/** Генерируем блоки по новому
- * Нужно создать новый тип тайлов с описанием типа
- * Нужно создать новый объект для списка тайлов к которому можно обращаться по координатам и вызывать его функции
- */
-
-class Block {
-    _type: string;
-    constructor(type: string) {
-        this._type = type;
-    }
-}
-
-class Chank extends tiles.TileMap {
-    _typesMap: Array<Array<String>>;
-}
-
-enum BlockType {
-    Stone,
-    Wood,
-    Gold
-}
-
-function setBlockAt(loc: tiles.Location, tile: Image, type: BlockType): void {
-    // TODO здесь надо задать отдельной ячейке тип
-
-    // Вызываем штатную функцию для тайлов
-    tiles.setTileAt(loc, tile);
-}
-
-function random (min: number, max: number) {
-    out = randint(55 - min, 55 - max)
-    return out
-}
-function circlesMove () {
-    angle = angle + increment
-    vx = radius2 * Math.cos(angle * Math.PI / 180)
-    vy = radius2 * Math.sin(angle * Math.PI / 180)
-    projectile = sprites.createProjectileFromSprite(img`
-        f 
-        `, mySprite, vx * speed, vy * speed)
-    projectile.setFlag(SpriteFlag.BounceOnWall, true)
-    scene.onHitWall(SpriteKind.Projectile, function (sprite, location) {
-        sprite.setVelocity(0, 0)
-
-
-        tiles.getTileAt(location.column, location.row).drawRect(0, 0, 16, 16, 4)
-    })
-}
-controller.A.onEvent(ControllerButtonEvent.Repeated, function () {
-    // Если клавиша зажата, будет выждана пауза прежде чем решить удалять или воспринять это как зажатая клавиша
-    controller.moveSprite(mySprite, 0, 0)
-    cursor.setInvisible(false);
-scene.cameraFollowSprite(cursor)
-    // Делается задержка перед повторным перемещением, чтобы не проскакивать слишком далеко
-    if (controller.left.isPressed()) {
-        timer.debounce("move", 50, function () {
-            cursor.controller_handler('left')
-        })
-    }
-    if (controller.right.isPressed()) {
-        timer.debounce("move", 50, function () {
-            cursor.controller_handler('right')
-        })
-    }
-    if (controller.up.isPressed()) {
-        timer.debounce("move", 50, function () {
-            cursor.controller_handler('up')
-        })
-    }
-    if (controller.down.isPressed()) {
-        timer.debounce("move", 50, function () {
-            cursor.controller_handler('down')
-        })
-    }
-})
-controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
-    controller.moveSprite(mySprite, 0, 0)
-    if (mode < режим.length - 1) {
-        mode = mode + 1
-    } else {
-        mode = 0
-    }
-    info.setScore(mode)
-})
-controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (isMove) {
-        cursor.setInvisible(true);
-scene.cameraFollowSprite(mySprite)
-        controller.moveSprite(mySprite, 100, 0)
-        isRight = true
-    }
-})
-controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (isMove) {
-        cursor.setInvisible(true);
-scene.cameraFollowSprite(mySprite)
-        controller.moveSprite(mySprite, 100, 0)
-        isRight = false
-    }
-})
-controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
-    // Лишает персонажа возможности двигаться
-    controller.moveSprite(mySprite, 0, 0)
-    cursor.setInvisible(false);
-isMove = false
-    startTime = game.runtime()
-})
-function рандомКарты () {
-    генераторБлоков(assets.tile`myTile14`, 1760, 50, 50)
-    генераторБлоков(assets.tile`myTile7`, 1760, 49, 45)
-    генераторБлоков(assets.tile`myTile0`, 1760, 44, 0)
-    генераторБлоков(assets.tile`myTile20`, 30, 0, 16)
-    генераторБлоков(assets.tile`myTile9`, 50, 0, 16)
-    генераторБлоков(assets.tile`myTile4`, 90, 0, 32)
-    генераторБлоков(assets.tile`myTile19`, 130, 0, 28)
-    генераторБлоков(assets.tile`myTile18`, 170, 0, 32)
-    генераторБлоков(assets.tile`myTile6`, 200, 0, 44)
-    генераторБлоков(assets.tile`myTile16`, 260, 0, 44)
-    генераторДеревьев(10, 51, 51)
-}
-controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (isMove) {
-        cursor.setInvisible(true);
-    }
-})
-controller.A.onEvent(ControllerButtonEvent.Released, function () {
-    endTime = game.runtime()
-    if (endTime - startTime <= 200) {
-        // todo: добавить условие стена/не стена для этих действий
-        if (mode == 0) {
-            destroyBlock(cursor.tilemapLocation());
-cursor._current_image = img`
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-            `;
-        } else if (mode == 1) {
-            createBlock(cursor.tilemapLocation());
-cursor._current_image = tiles.tileImageAtLocation(tiles.getTileLocation(cursor.tilemapLocation().column, cursor.tilemapLocation().row));
-        }
-    }
-    isMove = true
-})
-function генераторДеревьев (count: number, min: number, max: number) {
-    for (let index = 0; index < count; index++) {
-        col = randint(0, 55)
-        row = 55 - min
-        tiles.setTileAt(tiles.getTileLocation(col, row), assets.tile`myTile12`)
-        tiles.setTileAt(tiles.getTileLocation(col, row - 1), assets.tile`myTile12`)
-        tiles.setTileAt(tiles.getTileLocation(col, row - 2), assets.tile`myTile12`)
-        tiles.setTileAt(tiles.getTileLocation(col, row - 3), assets.tile`myTile12`)
-        tiles.setTileAt(tiles.getTileLocation(col, row - 4), assets.tile`myTile15`)
-        tiles.setTileAt(tiles.getTileLocation(col + 1, row - 3), assets.tile`myTile15`)
-        tiles.setTileAt(tiles.getTileLocation(col + 1, row - 4), assets.tile`myTile15`)
-        tiles.setTileAt(tiles.getTileLocation(col - 1, row - 3), assets.tile`myTile15`)
-        tiles.setTileAt(tiles.getTileLocation(col - 1, row - 4), assets.tile`myTile15`)
-    }
-}
-function генераторБлоков (myImage: Image, count: number, min: number, max: number) {
-    for (let index = 0; index < count; index++) {
-        col = randint(0, 55)
-        row = random(min, max)
-        tiles.setTileAt(tiles.getTileLocation(col, row), myImage)
-        tiles.setWallAt(tiles.getTileLocation(col, row), true)
-    }
-}
-controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (isMove) {
-        cursor.setInvisible(true);
-scene.cameraFollowSprite(mySprite)
-        controller.moveSprite(mySprite, 100, 0)
-        simplified.gravity_jump(mySprite, -200)
-    }
-})
-let col = 0
-let projectile: Sprite = null
-let vy = 0
-let vx = 0
-let angle = 0
-let out = 0
-let speed = 0
-let radius2 = 0
-let increment = 0
-let isMove = false
-let mode = 0
-let режим: string[] = []
-let isRight = false
-let row = 0
-
-scene.cameraFollowSprite(mySprite)
-info.setLife(20)
-рандомКарты()
-mySprite.ay = 850
-isRight = true
-режим = ["ставитьБлоки", "долбить"]
-mode = 0
-class InfoSprite {
-    private _sprite: Sprite;
-    private _image_info: Sprite; // Картинка выделенного объекта
-    private _label_info: string; // Название выделенного объекта
-    private displayed_info: Image = img`
-        2222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222
-        cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-        cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-        cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-        cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-        cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-        cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-        cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-        cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-        cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-        cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-        cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-        cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-        cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-        cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-        cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-        `
-    private hidden_info: Image = img`
-        ................................................................................................................................................................
-        ................................................................................................................................................................
-        ................................................................................................................................................................
-        ................................................................................................................................................................
-        ................................................................................................................................................................
-        ................................................................................................................................................................
-        ................................................................................................................................................................
-        ................................................................................................................................................................
-        ................................................................................................................................................................
-        ................................................................................................................................................................
-        ................................................................................................................................................................
-        ................................................................................................................................................................
-        ................................................................................................................................................................
-        ................................................................................................................................................................
-        ................................................................................................................................................................
-        ................................................................................................................................................................
-    `
-    constructor() {
-        this._sprite = new Sprite(this.displayed_info);
-        this.sprite.setPosition(0, 104);
-        this.image_info = new Sprite(img`
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-        `)
-        this.image_info.image.drawRect(0, 0, 16, 16, 2);
-    }
-    // Данные о новых координатах камеры должны приходить в параметрах метода
-    updatePosition() {
-        this._sprite.setPosition(scene.cameraProperty(CameraProperty.X), scene.cameraProperty(CameraProperty.Y) - 60 + 112)
-        this._image_info.setPosition(scene.cameraProperty(CameraProperty.X) - 16 * 4.5, scene.cameraProperty(CameraProperty.Y) - 60 + 112)
-    }
-
-    get sprite() {
-        return this._sprite;
-    }
-    set sprite(value) {
-        this._sprite = value;
-    }
-
-    // Методы для наполнения icon и label
-    get image_info() {
-        return this._image_info;
-    }
-    set image_info(value) {
-        this._image_info = value;
-    }
-    
-    get label_info() {
-        return this._label_info;
-    }
-    set label_info(value) {
-        this._label_info = value;
-    }
-
-    setInfo(image: Image, label: string) {
-        // Клонируем рисунок, т.к. это ссылочный тип
-        let newImage = image.clone();
-        // Рисуем квадрат вокруг изображения
-        newImage.drawRect(0, 0, 16, 16, 2); 
-        // Отображаем картинку в соответствующем спрайте
-        this.image_info.setImage(newImage);
-
-        // Добавляем аннотацию к изображению
-        this.label_info = label;
-    }
-
-    // Метод скрывает или отображает панель
-    isInvisible(bool: boolean) {
-        if (bool) {
-            this.sprite.setImage(this.displayed_info)
-        } else {
-            this.sprite.setImage(this.hidden_info)
-        }
-    }
-}
-class Cursor extends Sprite {
-    _current_image: Image;
-    _current_tile: typeof tiles;
-    sensitivity: number;
-    cursorInvisible: Image = img`
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . 
-        . . . . . . . . . . . . . . . . `;
-    cursorImage: Image;
-
-    constructor(sensitivity: number, image: Image) {
-        super(image);
-        this.cursorImage = image;
-        this.sensitivity = sensitivity;
-        this.setInvisible(false);
-        // устанавливает исходную картинку как самый левый верхний тайл
-        this._current_image = tiles.tileImageAtLocation(tiles.getTileLocation(0, 0));
-    }
-
-    controller_handler(direction: string) {
-        switch (direction) {
-            case 'left':
-                if (this.x > 8) {
-                    this.x += this.sensitivity * -1
-                }
-                break;
-            case 'right':
-                if (this.x <= 54 * 16) {
-                    this.x += this.sensitivity * 1
-                }
-                break;
-            case 'up':
-                if (this.y > 8) {
-                    this.y += this.sensitivity * -1
-                }
-                break;
-            case 'down':
-                if (this.y <= 54 * 16) {
-                    this.y += this.sensitivity * 1
-                }
-                break;
-            
-        }
-
-        let tile = tiles.getTileLocation(
-            cursor.tilemapLocation().column, cursor.tilemapLocation().row
-        )
-
-        // Сохраняем текущий тайл (картинку).
-        this._current_image = tiles.tileImageAtLocation(tiles.getTileLocation(cursor.tilemapLocation().column, cursor.tilemapLocation().row));
-    }
-
-    get current_image() {
-        return this._current_image;
-    }
-    set current_image(value) {
-        this._current_image = value;
-    }
-
-    setInvisible(bool: boolean) {
-        if (bool) {
-            this.setImage(this.cursorInvisible)
-        } else {
-            this.setImage(this.cursorImage)
-        }
-    }
-}
-let cursor = new Cursor(16, img`
-2 . 2 2 2 2 2 2 2 2 2 2 2 2 . 2 
-. . . . . . . . . . . . . . . . 
-2 . . . . . . . . . . . . . . 2 
-2 . . . . . . . . . . . . . . 2 
-2 . . . . . . . . . . . . . . 2 
-2 . . . . . . . . . . . . . . 2 
-2 . . . . . . . . . . . . . . 2 
-2 . . . . . . . . . . . . . . 2 
-2 . . . . . . . . . . . . . . 2 
-2 . . . . . . . . . . . . . . 2 
-2 . . . . . . . . . . . . . . 2 
-2 . . . . . . . . . . . . . . 2 
-2 . . . . . . . . . . . . . . 2 
-2 . . . . . . . . . . . . . . 2 
-. . . . . . . . . . . . . . . . 
-2 . 2 2 2 2 2 2 2 2 2 2 2 2 . 2 
-`);
-cursor.setPosition(8, 8)
-let infoSprite: InfoSprite;
-infoSprite = new InfoSprite();
-const destroyBlock = (location: tiles.Location) => {
-    let { walls } = scan();
-    let isFound = walls.some(item => item.column === location.column && item.row === location.row);
-
-    if (isFound) {
-        tiles.setTileAt(location, img`
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . 4 . . . . .
-            . . . . 2 . . . . 4 4 . . . . .
-            . . . . 2 4 . . 4 5 4 . . . . .
-            . . . . . 2 4 d 5 5 4 . . . . .
-            . . . . . 2 5 5 5 5 4 . . . . .
-            . . . . . . 2 5 5 5 5 4 . . . .
-            . . . . . . 2 5 4 2 4 4 . . . .
-            . . . . . . 4 4 . . 2 4 4 . . .
-            . . . . . 4 4 . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-            . . . . . . . . . . . . . . . .
-        `)
-        timer.after(100, function () {
-            tiles.setTileAt(location, img`
-                    .3. . . . . . . . . . . 4. . 
-                    . 3 3. . . . . . . . . 4 4. . 
-                    . 3 d 3. . 4 4. . 4 4 d 4. . 
-                    . . 3 5 3 4 5 5 4 4 d d 4 4. . 
-                    . . 3 d 5 d 1 1 d 5 5 d 4 4. . 
-                    . . 4 5 5 1 1 1 1 5 1 1 5 4. . 
-                    . 4 5 5 5 5 1 1 5 1 1 1 d 4 4. 
-                    . 4 d 5 1 1 5 5 5 1 1 1 5 5 4. 
-                    . 4 4 5 1 1 5 5 5 5 5 d 5 5 4. 
-                    . . 4 3 d 5 5 5 d 5 5 d d d 4. 
-                    . 4 5 5 d 5 5 5 d d d 5 5 4. . 
-                    . 4 5 5 d 3 5 d d 3 d 5 5 4. . 
-                    . 4 4 d d 4 d d d 4 3 d d 4. . 
-                    . . 4 5 4 4 4 4 4 4 4 4 4. . . 
-                    . 4 5 4. . 4 4 4. . . 4 4. . 
-                    . 4 4. . . . . . . . . . 4 4. 
-                    `)
-        })
-        timer.after(200, function () {
-            tiles.setTileAt(location, img`
-                    . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . 
-                    . . . . .b b.b b b. . . . . 
-                    . . . .b 1 1 b 1 1 1 b. . . . 
-                    . .b b 3 1 1 d d 1 d d b b. . 
-                    .b 1 1 d d b b b b b 1 1 b. . 
-                    .b 1 1 1 b. . . . .b d d b. 
-                    . . 3 d d b. . . . .b d 1 1 b
-            .b 1 d 3. . . . . . .b 1 1 b
-            .b 1 1 b. . . . . .b b 1 d b
-            .b 1 d b. . . . . .b d 3 d b
-            .b b d d b. . . .b d d d b. 
-                    .b d d d d b.b b 3 d d 3 b. 
-                    . .b d d 3 3 b d 3 3 b b b. . 
-                    . . .b b b d d d d d b. . . . 
-                    . . . . . .b b b b b. . . . . 
-                    `)
-        })
-        timer.after(300, function () {
-            tiles.setWallAt(location, false)
-            tiles.setTileAt(location, img`
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-                . . . . . . . . . . . . . . . .
-            `)
-        })
-    }
-}
-const createBlock = (location: tiles.Location) => {
-    let { empty } = scan();
-    let isFound2 = empty.some(item => item.column === location.column && item.row === location.row);
-
-    if (isFound2) {
-        tiles.setWallAt(location, true)
-        tiles.setTileAt(location, assets.tile`myTile0`)
-    }
-}
-let startTime: number;
-let endTime: number;
-isMove = true
-const scan = () => {
-    let radius = 4; // in tiles
-    let { column, row } = mySprite.tilemapLocation();
-    let wallsArray: Array<tiles.Location> = [];
-    let emptyArray: Array<tiles.Location> = [];
-    for (let y = row - radius; y < row + radius; y++) {
-        for (let x = column - radius; x < column + radius; x++) {
-            // todo: Встроить поиск углов каждого тайла и посылку туда выстрела для проверки доступности и только после этого сохранять массивы
-            if (tiles.tileAtLocationIsWall(tiles.getTileLocation(x, y))) {
-                wallsArray.push(tiles.getTileLocation(x, y));
-            } else {
-                emptyArray.push(tiles.getTileLocation(x, y));
-            }
-        }
-    }
-    console.log(`wallsArray:${wallsArray.length}, emptyArray:${emptyArray.length}`)
-    return { walls: wallsArray, empty: emptyArray }
-}
-increment = 5
-radius2 = 64
-speed = 5
-const findAngles = (location: tiles.Location) => {
-    let { x, y } = tiles.getTileLocation(location.column, location.row)
-    const width = 16; // ширина квадрата
-    const halfWidth = width / 2;
-    const topLeftX = x - halfWidth;
-    const topLeftY = y - halfWidth;
-    const topRightX = x + halfWidth;
-    const topRightY = y - halfWidth;
-    const bottomLeftX = x - halfWidth;
-    const bottomLeftY = y + halfWidth;
-    const bottomRightX = x + halfWidth;
-    const bottomRightY = y + halfWidth;
-    
-    return {
-        topLeft: { x: topLeftX, y: topLeftY },
-        topRight: { x: topRightX, y: topRightY },
-        bottomLeft: { x: bottomLeftX, y: bottomLeftY },
-        bottomRight: { x: bottomRightX, y: bottomRightY }
-    };
-}
+// Мой кастомный тайлмеп
+// TODO: создавать динамически
+tiles.setCurrentTilemap(tilemap`уровень1`)
+const chank1 = new Chank(5, 5);
+// ОБНОВЛЕНИЕ ДАННЫХ ПРИ КАЖДОЙ ПЕРЕРИСОВКЕ
+// Здесь нужно указывать текущее изображение на инфопанели
+// infoSprite.setInfo(cursor.current_image, 'current tile')
 game.onUpdate(function () {
-    infoSprite.updatePosition()
-    infoSprite.setInfo(cursor.current_image, 'current tile')
+
 })
 
-
+const testBlock = chank1.getBlock(tiles.getTileLocation(2, 2));
+testBlock.destroyBlock();
